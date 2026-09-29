@@ -54,5 +54,7 @@ jobs:
         run: pnpm test:release
       - name: Package smoke
         run: pnpm run pack-smoke
+      - name: Harness matrix
+        run: pnpm run harness-matrix
       - name: Audit plugin dependencies
         run: pnpm audit --audit-level high

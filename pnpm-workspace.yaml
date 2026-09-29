@@ -12,7 +12,15 @@ minimumReleaseAgeExclude:
   # harness line declares its peers against.
   - '@deepseek-ai/dsh'
   - '@deepseek-ai/dsh-*'
-  - '@deepseek-ai/cordis@4.0.2'
+  # The 0.1.7 line peers on cordis ~4.0.4 and resolves the publisher's own
+  # cordis, schemastery, cosmokit, and libreoffice modules published the same day,
+  # so those names are excluded alongside the harness line. Everything else still
+  # waits out the window.
+  - '@deepseek-ai/cordis'
+  - '@deepseek-ai/cordis-*'
+  - '@deepseek-ai/cosmokit'
+  - '@deepseek-ai/schemastery'
+  - '@deepseek-ai/libreoffice-kit*'
 allowBuilds:
   # Build steps the pinned toolchain needs: the profile test drives
   # @deepseek-ai/dsh, which loads a subprocess backend, a native pty, and FFI.

@@ -50,6 +50,23 @@ import {
 /** The plugin row name, used for provenance on every message it injects. */
 export const name = 'dsh-terse'
 
+/**
+ * The nudge's own message-source kind.
+ *
+ * 0.1.7 dropped the shared `plugin` kind, because a source that cannot name its
+ * producer leaves derived history unreadable: every producer declares the kind
+ * it can be recognized by. Declaring it here is what registers the kind with the
+ * compiler, and the constant keeps the object and the declaration in step.
+ */
+declare module '@deepseek-ai/dsh-llm' {
+  interface MessageSourceMap {
+    'terse-nudge': { kind: 'terse-nudge'; plugin: string; form: 'notice'; summary: string }
+  }
+}
+
+/** The kind this plugin's nudges carry, named rather than borrowed. */
+const NUDGE_KIND = 'terse-nudge'
+
 /** The prompt registry is required; otherwise the constitution has nowhere to land. */
 export const inject = ['systemPrompt']
 
@@ -263,7 +280,7 @@ function shapeResult(
 function nudgeMessage(): UserMessage {
   return createUserMessage({
     content: [{ type: 'text', text: DRIFT_NUDGE }],
-    source: { kind: 'plugin', plugin: name, form: 'notice', summary: DRIFT_NUDGE_SUMMARY },
+    source: { kind: NUDGE_KIND, plugin: name, form: 'notice', summary: DRIFT_NUDGE_SUMMARY },
   })
 }
 
