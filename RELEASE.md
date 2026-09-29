@@ -11,7 +11,7 @@ Applies to maintainers. Current release owner: repository owner ([`LICENSE`](LIC
 1. Candidate lands on `main` through a reviewed PR (squash merge).
 2. `verify` CI green on the exact merged SHA.
 3. Locally on that SHA: `pnpm run typecheck`, `pnpm test`, `pnpm run build`, `pnpm run test:build`, `pnpm test:release`, `pnpm run pack-smoke`, `pnpm run harness-matrix`, `npm audit signatures`, and `pnpm audit --audit-level high`.
-4. Dogfooding: install the packed candidate into a plugin profile whose harness is a supported line (`>=0.1.5-rc.1 <0.2.0`) and drive a real session. Confirm the constitution section and standing reminder appear, that tool output above the shaping threshold is elided with a locator, and that the nudge fires only after a genuinely long turn. Unit tests do not prove the row composes into a live profile's prompt or that elision stays reversible in a real session.
+4. Dogfooding: install the packed candidate into a plugin profile whose harness is a supported line (`>=0.1.5-rc.1 <0.3.0`) and drive a real session. Confirm the constitution section and standing reminder appear, that tool output above the shaping threshold is elided with a locator, and that the nudge fires only after a genuinely long turn. Unit tests do not prove the row composes into a live profile's prompt or that elision stays reversible in a real session.
 5. README accuracy pass: every documented command, profile path, and configuration reference still behaves as written.
 6. A published npm version is immutable. A broken release is forward-fixed, never unpublished (see [Rollback](#rollback)).
 
@@ -19,7 +19,9 @@ Applies to maintainers. Current release owner: repository owner ([`LICENSE`](LIC
 
 The plugin peers on harness modules and compiles against one verified release, so `dsh.compatibility` states the pair: `dsh` is the range a profile installs against, and `dshReleases` lists the releases that passed the gates. `node tools/harness-matrix.mjs` checks that matrix offline — every verified release lies inside the range, every harness peer accepts the range, and the harness devDependencies name one verified release — and `pnpm run check` runs it with the rest of the gates.
 
-A range admits a prerelease only through a comparator naming its own `X.Y.Z` tuple, so `>=0.1.5-rc.1 <0.2.0` resolves `0.1.5-rc.3` and never `0.1.7-rc.2`: the peers carry the whole range, because that is the line a profile installs against, while the packages in the dev tree name one verified release, the way the harness's own bundles pin.
+A range admits a prerelease only through a comparator naming its own `X.Y.Z` tuple, so `>=0.1.5-rc.1 <0.3.0` resolves `0.1.5-rc.3` and `0.2.0-rc.2` and never `0.1.7-rc.2`: the peers carry the whole range, because that is the line a profile installs against, while the packages in the dev tree name one verified release, the way the harness's own bundles pin.
+
+A 0.2.0 host denies a profile row by evaluating that row's `peerDependencies` against the release that is running, with prereleases participating, so the peers have to admit every listed release or the host disables the row before the plugin is loaded at all. `dsh.compatibility.dsh` is the window this repository and its docs state; on 0.2.0 nothing in the CLI reads it.
 
 That is the matrix bump, and it is a release-sized change:
 
@@ -28,6 +30,8 @@ That is the matrix bump, and it is a release-sized change:
 3. `pnpm install`, then run every gate in [Gates](#gates--all-required-before-tagging). A release inside the quarantine window needs its name — or the publisher names it resolves — in `minimumReleaseAgeExclude` of `pnpm-workspace.yaml`, which states why.
 4. Dogfood a real session against the new release before it ships: install the packed candidate into a cloned profile and drive the surface per [README](README.md#try-it-in-the-tui).
 5. Land the bump through a reviewed PR and ship it with the next patch release.
+
+Two facts about the 0.2.0 line belong beside the matrix: `@deepseek-ai/dsh-agent-presets` and `@deepseek-ai/dsh-code-runtime-worker-thread` publish no 0.2.0 release, while `@deepseek-ai/dsh-agent-preset`, `dsh-agent-preset-registry`, `dsh-cordis-host-runner`, `dsh-ptc-runtime-node`, and the packages this plugin pins do. This plugin mounts neither missing package.
 
 Two facts about the 0.1.7 line belong beside the matrix. The agent preset roster moved to `@deepseek-ai/dsh-agent-preset-registry` with one `@deepseek-ai/dsh-agent-preset` row per mode, and `@deepseek-ai/dsh-code-runtime-worker-thread` has no release past `0.1.5-rc.3`, so a bundle that mounts a PTC runtime names `@deepseek-ai/dsh-ptc-runtime-node` on that line. This plugin mounts neither, so neither fact moves a row here.
 

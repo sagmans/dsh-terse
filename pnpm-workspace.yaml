@@ -21,6 +21,11 @@ minimumReleaseAgeExclude:
   - '@deepseek-ai/cosmokit'
   - '@deepseek-ai/schemastery'
   - '@deepseek-ai/libreoffice-kit*'
+  # The 0.2.0 line's pi-ai provider resolves its own runtime published the same
+  # day, so those names are excluded with it; everything else still waits out the
+  # window.
+  - '@earendil-works/pi-ai'
+  - '@earendil-works/pi-telemetry'
 allowBuilds:
   # Build steps the pinned toolchain needs: the profile test drives
   # @deepseek-ai/dsh, which loads a subprocess backend, a native pty, and FFI.

@@ -18,7 +18,22 @@ patch carries only fixes.
 
 ### Changed
 
-- The harness window widens to `>=0.1.5-rc.1 <0.2.0`, and `0.1.7-rc.2` joins the verified
+- The harness window widens to `>=0.1.5-rc.1 <0.3.0`, and `0.2.0-rc.2` joins the verified
+  list. A range reaches a prerelease only through a comparator naming that exact tuple, so the
+  `<0.2.0` ceiling could never admit the 0.2.0 line, and a host on that line disables any row
+  whose peer range does not admit its own version. The peers move with the range because
+  `tools/harness-matrix.mjs` holds them equal to it, and the harness `devDependencies`
+  compile against `0.2.0-rc.2` — every pinned package exists at that release.
+
+- `@earendil-works/pi-ai` and `@earendil-works/pi-telemetry` join
+  `minimumReleaseAgeExclude`: the 0.2.0 line's pi-ai provider resolves `0.87.1`, which was
+  published inside the quarantine window, and the rest of the tree still waits it out.
+
+- The declared `terse-nudge` message-source kind still holds on 0.2.0: `MessageSourceMap`
+  remains a merge-extensible sum type that no shared `plugin` kind fills in, so the
+  augmentation is what names this producer there as it did on 0.1.7.
+
+- The earlier entry: the harness window widens to `>=0.1.5-rc.1 <0.2.0`, and `0.1.7-rc.2` joins the verified
   list. The former `<0.1.6` ceiling excluded a line the plugin composes on, and the peers
   carried the same narrow window, so a profile running a newer harness resolved a second
   copy of every harness module this plugin peers on. Every listed release passes

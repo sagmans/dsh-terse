@@ -4,7 +4,7 @@
 maximally terse without costing quality. It is always-on and append-only: it contributes a
 prompt section, a durable context snapshot, and two `tools/post-execute` behaviours, and it
 never touches the deployment's own system prompt. ESM TypeScript (strict), Node ^24, pnpm
-11.21.0, and the harness window `>=0.1.5-rc.1 <0.2.0` (`dsh.compatibility` in
+11.21.0, and the harness window `>=0.1.5-rc.1 <0.3.0` (`dsh.compatibility` in
 `package.json`), whose verified releases live in `dsh.compatibility.dshReleases`: an API
 outside that line is not available here. Behaviour, install, and the benchmark that backs
 the claims: [README.md](README.md) and [benchmark/README.md](benchmark/README.md). Release
@@ -85,13 +85,15 @@ skips the publish job for `v0.1.0`; follow [RELEASE.md](RELEASE.md) for that one
 and `dsh.compatibility.dsh` accept the whole compatible line, while the harness
 `devDependencies` and `dsh.compatibility.dshReleases` name the releases that passed the
 gates: npm resolves a prerelease only through a comparator naming its own `X.Y.Z` tuple, so
-`>=0.1.5-rc.1 <0.2.0` reaches `0.1.5-rc.3` and never `0.1.7-rc.2`. `node
+`>=0.1.5-rc.1 <0.3.0` reaches `0.1.5-rc.3` and `0.2.0-rc.2` and never `0.1.7-rc.2`. The
+harness's own row preflight reads the peers instead, with prereleases participating, so the
+peers have to admit every listed release. `node
 tools/harness-matrix.mjs` guards the matrix and [RELEASE.md](RELEASE.md#harness-matrix) owns
 the bump; moving one side alone is the drift the guard exists to catch.
 
 **Dependencies resolve under quarantine.** `pnpm-workspace.yaml` sets `minimumReleaseAge: 10080`
-with the harness lines — and the publisher's cordis, schemastery, and cordis-plugin names those
-lines resolve — excluded, and a package whose install runs a build step stays blocked
+with the harness lines, the publisher's cordis, schemastery, and cordis-plugin names those
+lines resolve, and the 0.2.0 line's `@earendil-works/pi-ai` runtime excluded, and a package whose install runs a build step stays blocked
 until it is listed in `allowBuilds`. `.github/dependabot.yml` repeats that window as a 7-day
 cooldown and ignores the transitive `@vitest/mocker` major and minor raises the runner cannot
 take. CI adds `npm audit signatures` and `pnpm audit --audit-level high` on top of
