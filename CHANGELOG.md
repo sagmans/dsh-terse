@@ -8,6 +8,8 @@ patch carries only fixes.
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-09-30
+
 ### Added
 
 - `tools/harness-matrix.mjs` guards the manifest's harness matrix, and `pnpm run check`
@@ -15,6 +17,14 @@ patch carries only fixes.
   window — the compatible range, the verified list, and the release the dev tree compiles
   against — drifted apart once already, and a profile reads that drift as a harness copy of
   its own beside the host's ([RELEASE.md](RELEASE.md#harness-matrix)).
+
+- `.github/dependabot.yml` states this repository's update policy, because GitHub's
+  defaults fought it: a three-day cooldown against the seven-day quarantine
+  `pnpm-workspace.yaml` sets, and one group that mixed a direct dependency with the
+  transitive one that had outrun its pin. The policy mirrors the quarantine, exempts the
+  harness lines the workspace already exempts, and holds `@vitest/mocker` to the runner
+  that pins it, so a bot pull request and `pnpm install` agree on what is old enough to
+  land.
 
 ### Changed
 
@@ -49,3 +59,36 @@ patch carries only fixes.
 - A range admits a prerelease only through a comparator naming its own `X.Y.Z` tuple, so
   the harness peers carry the whole range while the harness `devDependencies` name one
   verified release: `>=0.1.5-rc.1 <0.2.0` resolves `0.1.5-rc.3` and never `0.1.7-rc.2`.
+
+- The `@types/node` line moves onto the engine line, and the update policy stops
+  proposing Node majors. The pin named Node 22 while `engines.node` and the runner are
+  Node 24, so typecheck resolved APIs the engine does not provide and nothing in the
+  repository compared the two; an exact pin gives the bot no range to respect, so its
+  target is always the newest major and every future one becomes a raise the engine
+  cannot support.
+
+- `vitest` moves to the patched `4.1.11` release, which closes a medium advisory in the
+  mock loader's redirect handling. A transitive `@vitest/mocker` raise was refused
+  instead: that package cannot cross a major line ahead of the runner that pins it, and
+  the patched 4.1.x already closes the advisory.
+
+- Every GitHub Actions pin names the release it resolves, and the harness
+  `devDependencies` move together onto the release the lockfile already built. A bare SHA
+  cannot be reviewed for whether it is the release it claims, which is how a supply-chain
+  swap hides, and a manifest describing a tree the install does not build is drift no
+  reviewer can see.
+
+- The PTY the release helper opens answers npm's browser prompt as it appears. The
+  wrapper had opened the terminal and never written to it, so the read stalled until the
+  window closed and the operator was never asked to approve — the same defect that
+  blocked trust configuration twice while bootstrapping a sibling package. That registry
+  readback now lives in the shared helper as well: one implementation cannot receive a fix
+  the other never sees.
+
+- `AGENTS.md` is refreshed against the tree, and the README links a document that ships
+  rather than one `.gitignore` excludes. The map had named a single writer where two paths
+  write behind the same `CONFIRM` gate, which is the kind of drift a reader takes for
+  policy.
+
+[Unreleased]: https://github.com/sagmans/dsh-terse/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/sagmans/dsh-terse/compare/v0.1.0...v0.2.0

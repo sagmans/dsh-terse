@@ -1,6 +1,6 @@
 {
   "name": "@sagmans/dsh-terse",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "DeepSeek Harness plugin that makes agent output maximally terse, concise, and clean without sacrificing quality. Always-on, append-only.",
   "keywords": [
     "deepseek-harness",
