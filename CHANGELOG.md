@@ -13,6 +13,15 @@ patch carries only fixes.
 - Agent guidance now requires signed version tags, matching GitHub releases,
   publication approval, and npm readback so published versions keep a complete
   source and release record without accidental republication.
+- Dev toolchain moves to cordis 4.0.4, schemastery 3.18.4, `@types/node` 24.19.0,
+  and vitest 5.0.3.
+
+### Security
+
+- Security floors in `pnpm-workspace.yaml` lift the transitive
+  `@modelcontextprotocol/sdk`, `@modelcontextprotocol/client`, `http-cache-semantics`,
+  `sharp`, and `source-map-js` out of their advised ranges, so
+  `pnpm audit --audit-level high` passes again.
 
 ## [0.2.0] - 2026-09-30
 

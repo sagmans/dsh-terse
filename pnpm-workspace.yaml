@@ -36,3 +36,16 @@ allowBuilds:
   koffi: true
   node-pty: true
   protobufjs: true
+# Security floors for transitive dependencies the harness and toolchain pull in.
+# Each entry only matches the vulnerable range, so a release that already ships
+# the fix resolves untouched and the entry can be dropped then.
+#   GHSA-6qxp-vccf-f47h  @modelcontextprotocol/sdk, @modelcontextprotocol/client
+#   GHSA-ch52-4w7c-c8xp  http-cache-semantics
+#   GHSA-wq5f-xc86-pv6w  sharp
+#   source-map-js        event-loop denial of service, fixed in 1.2.2
+overrides:
+  '@modelcontextprotocol/client@<2.2.0': 2.2.0
+  '@modelcontextprotocol/sdk@<1.31.0': ^1.31.0
+  'http-cache-semantics@<4.2.1': ^4.2.1
+  'sharp@<0.35.5': ^0.35.5
+  'source-map-js@<1.2.2': ^1.2.2
