@@ -64,7 +64,7 @@ nudge, or shaping also needs the dogfood run: the unit specs never load the real
   `CONFIRM=<action>`. `scripts/npm/github_release.py` adds the create-only GitHub controls
   behind the same gate, and `tools/pack-smoke.mjs` proves the tarball ships what the manifest
   points at.
-- `.github/workflows/check.yml` gates every change; `release.yml` publishes on a `v*` tag
+- the tracked `pre-push` hook (`.githooks/`) gates every change; `release.yml` publishes on a `v*` tag
   through npm OIDC trusted publishing behind the `npm-release` approval environment.
 - `docs/` holds research and planning notes and is gitignored on purpose; nothing there ships
   or gets committed. `dist/` is build output and is not edited by hand.
@@ -148,3 +148,7 @@ If a tag or signature is missing or invalid, stop and ask the maintainer; do not
 invent a source commit from current `main`. Forward-fix broken packages as
 `RELEASE.md` directs. Helper mutations require `CONFIRM=<action>`; preview
 with `DRY_RUN=1`.
+
+## Git hooks
+
+Checks run in `.githooks/`, not in push/PR CI. Run `sh scripts/setup-hooks.sh` once per clone; never bypass hooks with `--no-verify`. `pre-push`: `npm audit signatures`, `pnpm run check`, `pnpm audit --audit-level high`.
