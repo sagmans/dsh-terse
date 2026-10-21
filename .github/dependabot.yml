@@ -41,6 +41,10 @@ updates:
     directory: /
     schedule:
       interval: weekly
+    # A new action release runs with repository access in CI, so it waits the
+    # same 7 days as a package before the bot proposes it.
+    cooldown:
+      default-days: 7
     groups:
       actions:
         patterns: ['*']
