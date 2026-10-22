@@ -40,12 +40,17 @@ allowBuilds:
 # Each entry only matches the vulnerable range, so a release that already ships
 # the fix resolves untouched and the entry can be dropped then.
 #   GHSA-6qxp-vccf-f47h  @modelcontextprotocol/sdk, @modelcontextprotocol/client
+#   GHSA-6prh-2h8m-c8cw  @modelcontextprotocol/client
 #   GHSA-ch52-4w7c-c8xp  http-cache-semantics
 #   GHSA-wq5f-xc86-pv6w  sharp
 #   source-map-js        event-loop denial of service, fixed in 1.2.2
+#   GHSA-px8p-9vwx-vf98  fflate
+#   GHSA-587h-7wmj-h5pm, GHSA-r825-w8mm-5pxw, GHSA-698v-4r3x-3vcv  vite
 overrides:
-  '@modelcontextprotocol/client@<2.2.0': 2.2.0
+  '@modelcontextprotocol/client@<2.3.0': ^2.3.1
   '@modelcontextprotocol/sdk@<1.31.0': ^1.31.0
   'http-cache-semantics@<4.2.1': ^4.2.1
   'sharp@<0.35.5': ^0.35.5
   'source-map-js@<1.2.2': ^1.2.2
+  'fflate@>=0.8.0 <0.8.3': ^0.8.3
+  'vite@>=8.3.0 <8.3.3': ^8.3.4

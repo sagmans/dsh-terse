@@ -8,6 +8,16 @@ patch carries only fixes.
 
 ## [Unreleased]
 
+### Security
+
+- Security floors in `pnpm-workspace.yaml` now lift the transitive
+  `@modelcontextprotocol/client` to `2.3.1` (GHSA-6prh-2h8m-c8cw: HTTP transports and OAuth
+  requests followed cross-origin redirects and re-sent custom headers and request bodies),
+  `vite` to `8.3.4` (GHSA-587h-7wmj-h5pm, GHSA-r825-w8mm-5pxw, GHSA-698v-4r3x-3vcv: editor
+  launch flaws), and `fflate` to `0.8.3` (GHSA-px8p-9vwx-vf98: a malformed ZIP sends
+  `unzipSync` into an infinite loop), so `pnpm audit` reports no known vulnerabilities. The
+  published package is unchanged.
+
 ## [0.2.1] - 2026-10-14
 
 ### Compatibility
