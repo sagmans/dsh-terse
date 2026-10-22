@@ -65,7 +65,8 @@ nudge, or shaping also needs the dogfood run: the unit specs never load the real
   behind the same gate, and `tools/pack-smoke.mjs` proves the tarball ships what the manifest
   points at.
 - the tracked `pre-push` hook (`.githooks/`) gates every change; `release.yml` publishes on a `v*` tag
-  through npm OIDC trusted publishing behind the `npm-release` approval environment.
+  through npm OIDC trusted publishing on the tag-only `npm-release` environment, with no
+  further approval: the admin-only tag ruleset makes the tag push the release approval.
 - `docs/` holds research and planning notes and is gitignored on purpose; nothing there ships
   or gets committed. `dist/` is build output and is not edited by hand.
 
@@ -128,7 +129,8 @@ and each remote release action; never publish on your own initiative.
    release tag; require GitHub to verify the signature after the approved push.
 3. Push only that tag with `git push origin "vX.Y.Z"` after approval.
    `.github/workflows/release.yml` verifies the tag and publishes through npm
-   OIDC trusted publishing after the `npm-release` environment approval.
+   OIDC trusted publishing at once; the tag push is the release approval, so
+   no environment approval follows it.
    Wait for success; never substitute a local `npm publish`. The documented
    first-publication bootstrap is a maintainer-only exception, not a retry path.
 4. After publication succeeds, create the GitHub release from the existing tag:

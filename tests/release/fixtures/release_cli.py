@@ -143,12 +143,17 @@ if TOOL == "gh":
     if "--method" in ARGS:
         payload = json.load(sys.stdin)
         if endpoint == environment_endpoint:
+            # Mirror GitHub: protections follow the payload, so a reviewer sent by the
+            # helper would surface here and fail its own readback.
+            protections = [{"type": "branch_policy"}]
+            if payload.get("reviewers"):
+                protections.append({"type": "required_reviewers", "reviewers": [
+                    {"type": "User", "reviewer": {"id": 42, "login": "example"}}
+                ]})
             state["environment"] = {
                 "can_admins_bypass": payload["can_admins_bypass"],
                 "deployment_branch_policy": payload["deployment_branch_policy"],
-                "protection_rules": [{"type": "required_reviewers", "reviewers": [
-                    {"type": "User", "reviewer": {"id": 42, "login": "example"}}
-                ]}],
+                "protection_rules": protections,
             }
         elif endpoint == policies_endpoint:
             if SCENARIO == "policy-error":
@@ -168,9 +173,7 @@ if TOOL == "gh":
         if SCENARIO == "branch-policy":
             output({"can_admins_bypass": False,
                     "deployment_branch_policy": {"protected_branches": False, "custom_branch_policies": True},
-                    "protection_rules": [{"type": "required_reviewers", "reviewers": [
-                        {"type": "User", "reviewer": {"id": 42}}
-                    ]}]})
+                    "protection_rules": [{"type": "branch_policy"}]})
         if "environment" in state:
             output(state["environment"])
         print("gh: Not Found (HTTP 404)", file=sys.stderr)
