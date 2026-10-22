@@ -8,6 +8,13 @@ patch carries only fixes.
 
 ## [Unreleased]
 
+### Changed
+
+- Publication is automatic on a signed `v*` tag push by an admin. The admin-only tag
+  ruleset makes the tag push the release approval, so the `npm-release` environment no
+  longer waits for a reviewer. The release helper creates and accepts that environment,
+  and `RELEASE.md` documents how to restore a reviewer gate.
+
 ### Security
 
 - Security floors in `pnpm-workspace.yaml` now lift the transitive
