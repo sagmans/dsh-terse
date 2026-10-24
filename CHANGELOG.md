@@ -24,6 +24,15 @@ patch carries only fixes.
   launch flaws), and `fflate` to `0.8.3` (GHSA-px8p-9vwx-vf98: a malformed ZIP sends
   `unzipSync` into an infinite loop), so `pnpm audit` reports no known vulnerabilities. The
   published package is unchanged.
+- The lockfile now resolves the transitive `zod` `4.6.7` (GHSA-mrhx-c7xc-m3w5: oversized
+  constrained collections exhaust memory during validation), `undici` `8.12.2`
+  (GHSA-xjj6-f33q-929c, GHSA-4qv8-2p9j-2685, GHSA-f72v-6w45-q472: denial of service through
+  stacked content encodings or an unbounded EventSource buffer, and an integrity-check
+  bypass), and `fast-uri` `3.1.9` (GHSA-333x-w4r6-6crp, GHSA-w74x-v6f9-j3xg,
+  GHSA-wjr9-j795-jxcr, GHSA-xhq7-xmqj-769h: scheme injection, scheme spoofing, host
+  confusion, and path equivalence in URI handling). The harness ranges already admit each
+  fix, so no override is needed; `fast-uri` `3.1.9` is exempt from the release-age window
+  until it ages out. The published package is unchanged.
 
 ## [0.2.1] - 2026-10-14
 
