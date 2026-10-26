@@ -33,6 +33,11 @@ patch carries only fixes.
   confusion, and path equivalence in URI handling). The harness ranges already admit each
   fix, so no override is needed; `fast-uri` `3.1.9` is exempt from the release-age window
   until it ages out. The published package is unchanged.
+- Both release jobs run on Node.js `24.22.1` instead of the runner's floating `24`.
+  `24.22.1` is the 24.x security release that fixes CVE-2026-111497 (Brotli decoder
+  out-of-bounds write) and CVE-2026-105483 and CVE-2026-106069 (TLS hostname check
+  bypass). An exact pin means the release can no longer verify or publish on an unpatched
+  cached runtime. Checks and tests pass on `24.22.1`. The published package is unchanged.
 
 ## [0.2.1] - 2026-10-14
 
