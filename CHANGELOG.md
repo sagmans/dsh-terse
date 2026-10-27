@@ -10,6 +10,7 @@ patch carries only fixes.
 
 ### Changed
 
+- The `fast-uri` `3.1.9` exemption from the release-age window is removed, because the release has aged past the window. The published package is unchanged.
 - Publication is automatic on a signed `v*` tag push by an admin. The admin-only tag
   ruleset makes the tag push the release approval, so the `npm-release` environment no
   longer waits for a reviewer. The release helper creates and accepts that environment,

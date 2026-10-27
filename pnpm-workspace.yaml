@@ -26,11 +26,6 @@ minimumReleaseAgeExclude:
   # window.
   - '@earendil-works/pi-ai'
   - '@earendil-works/pi-telemetry'
-  # Security fix that cannot wait out the window: the only fast-uri 3.x release
-  # that clears GHSA-333x-w4r6-6crp, GHSA-w74x-v6f9-j3xg, GHSA-wjr9-j795-jxcr,
-  # and GHSA-xhq7-xmqj-769h. One exact version, so no later release inherits the
-  # exemption. Remove after 2026-10-26 23:06 UTC (published 2026-10-19 23:05 UTC).
-  - 'fast-uri@3.1.9'
 allowBuilds:
   # Build steps the pinned toolchain needs: the profile test drives
   # @deepseek-ai/dsh, which loads a subprocess backend, a native pty, and FFI.
