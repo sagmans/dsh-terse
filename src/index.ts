@@ -19,11 +19,19 @@
  * @module dsh-terse
  */
 import type { Context } from '@deepseek-ai/cordis'
-import { createUserMessage } from '@deepseek-ai/dsh-llm'
 import type { ContentBlock } from '@deepseek-ai/dsh-llm'
+import { createUserMessage } from '@deepseek-ai/dsh-llm'
 import type { UserMessage } from '@deepseek-ai/dsh-session'
 import type { PostToolDecision, ToolExecution, ToolExecutionResult } from '@deepseek-ai/dsh-tools'
 import z from '@deepseek-ai/schemastery'
+import {
+  advance,
+  type DriftConfig,
+  type DriftCounters,
+  initialCounters,
+  resolveDriftConfig,
+  shouldNudge,
+} from './drift.ts'
 import {
   CONSTITUTION,
   CONSTITUTION_ORDER,
@@ -32,20 +40,7 @@ import {
   STANDING_ORDER,
   STANDING_REMINDER,
 } from './instructions.ts'
-import {
-  advance,
-  initialCounters,
-  resolveDriftConfig,
-  shouldNudge,
-  type DriftConfig,
-  type DriftCounters,
-} from './drift.ts'
-import {
-  resolveShapingConfig,
-  shapeText,
-  textOf,
-  type ShapingConfig,
-} from './shaping.ts'
+import { resolveShapingConfig, type ShapingConfig, shapeText, textOf } from './shaping.ts'
 
 /** The plugin row name, used for provenance on every message it injects. */
 export const name = 'dsh-terse'
@@ -171,11 +166,13 @@ export function apply(ctx: Context, config: Config = {}): void {
   // constitution survived assembly and otherwise defers; it exists so a future
   // enforcement rule has one obvious home and so a mis-ordered contribution is
   // visible in logs rather than silent.
-  ctx.on('system-prompt/assemble', async (assembly, _context, next) => {
+  ctx.on('system-prompt/assemble', async (_assembly, _context, next) => {
     const resolved = await next()
     const present = resolved.sections.some((section) => section.name === 'terse:constitution')
     if (!present) {
-      ctx.logger.warn('dsh-terse: constitution section missing from assembly; terseness rules are not reaching the model')
+      ctx.logger.warn(
+        'dsh-terse: constitution section missing from assembly; terseness rules are not reaching the model',
+      )
     }
     return resolved
   })
@@ -234,7 +231,9 @@ function installPostExecute(
       // A concluding result ends the turn, so a nudge there would only buy an
       // extra step after the tools have wound down.
       const nudging =
-        state !== undefined && result.concludesTurn !== true && shouldNudge(state.counters, state.lastReply, driftConfig)
+        state !== undefined &&
+        result.concludesTurn !== true &&
+        shouldNudge(state.counters, state.lastReply, driftConfig)
 
       const downstream = await next()
       const shaped =
@@ -271,7 +270,10 @@ function shapeResult(
   if (!shaped.changed) return undefined
   // Rebuilt rather than spread because the accept union forbids `content` on the
   // `value` arm; naming the fields keeps this on the content arm by construction.
-  const rebuilt: PostToolDecision = { kind: 'accept', content: [{ type: 'text', text: shaped.text }] }
+  const rebuilt: PostToolDecision = {
+    kind: 'accept',
+    content: [{ type: 'text', text: shaped.text }],
+  }
   const contexts = downstream.additionalContexts
   return contexts === undefined ? rebuilt : { ...rebuilt, additionalContexts: contexts }
 }

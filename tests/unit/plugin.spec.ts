@@ -1,8 +1,8 @@
-import { describe, expect, it, vi } from 'vitest'
 import type { Context } from '@deepseek-ai/cordis'
+import { describe, expect, it, vi } from 'vitest'
 import { DRIFT_DEFAULTS } from '@/drift.ts'
-import { CONSTITUTION, STANDING_REMINDER } from '@/instructions.ts'
 import { apply } from '@/index.ts'
+import { CONSTITUTION } from '@/instructions.ts'
 
 /**
  * A minimal fake of the Cordis context surface `apply` touches.
@@ -11,16 +11,25 @@ import { apply } from '@/index.ts'
  * to prove the WIRING: which layers register where, that both post-execute
  * concerns share one listener, and that the nudge cannot fire past its cap.
  */
+/** Untyped stand-in for the harness listener and section callbacks the fake records. */
+type Listener = (...args: unknown[]) => unknown
+
 function fakeCtx() {
   const sections: Array<Record<string, unknown>> = []
   const contexts: Array<Record<string, unknown>> = []
-  const listeners = new Map<string, Function[]>()
+  const listeners = new Map<string, Listener[]>()
   const ctx = {
     systemPrompt: {
-      section: (s: Record<string, unknown>) => { sections.push(s); return () => {} },
-      context: (c: Record<string, unknown>) => { contexts.push(c); return () => {} },
+      section: (s: Record<string, unknown>) => {
+        sections.push(s)
+        return () => {}
+      },
+      context: (c: Record<string, unknown>) => {
+        contexts.push(c)
+        return () => {}
+      },
     },
-    on: (event: string, fn: Function) => {
+    on: (event: string, fn: Listener) => {
       const list = listeners.get(event) ?? []
       list.push(fn)
       listeners.set(event, list)
@@ -31,7 +40,7 @@ function fakeCtx() {
   return { ctx: ctx as unknown as Context, sections, contexts, listeners }
 }
 
-const emitter = (listeners: Map<string, Function[]>, event: string) => listeners.get(event) ?? []
+const emitter = (listeners: Map<string, Listener[]>, event: string) => listeners.get(event) ?? []
 
 describe('apply wiring', () => {
   it('registers the static constitution section', () => {
@@ -39,7 +48,8 @@ describe('apply wiring', () => {
     apply(ctx)
     expect(sections).toHaveLength(1)
     expect(sections[0]?.name).toBe('terse:constitution')
-    expect((sections[0]?.text as Function)()).toBe(CONSTITUTION)
+    const text = sections[0]?.text as Listener
+    expect(text()).toBe(CONSTITUTION)
   })
 
   it('registers the durable standing context', () => {
@@ -47,7 +57,8 @@ describe('apply wiring', () => {
     apply(ctx)
     expect(contexts).toHaveLength(1)
     expect(contexts[0]?.name).toBe('terse:standing')
-    expect((contexts[0]?.text as Function)()).toContain('<system-reminder>')
+    const text = contexts[0]?.text as Listener
+    expect(text()).toContain('<system-reminder>')
   })
 
   it('suppresses the standing context when the text is empty', () => {
@@ -77,14 +88,16 @@ describe('post-execute behaviour', () => {
   ) {
     const { ctx, listeners } = fakeCtx()
     apply(ctx, config)
-    const handler = emitter(listeners, 'tools/post-execute')[0] as Function
+    const handler = emitter(listeners, 'tools/post-execute')[0] as Listener
     const exec = { agent: { session: {} }, name: 'bash' }
     const next = payload.next ?? (async () => ({ kind: 'accept' }))
     return await handler(exec, payload.result, next)
   }
 
   it('leaves a small successful result unchanged', async () => {
-    const decision = await runOne({ result: { isError: false, content: [{ type: 'text', text: 'ok' }] } })
+    const decision = await runOne({
+      result: { isError: false, content: [{ type: 'text', text: 'ok' }] },
+    })
     expect(decision).toEqual({ kind: 'accept' })
   })
 
@@ -98,19 +111,19 @@ describe('post-execute behaviour', () => {
 
   it('shapes only when downstream accepted content', async () => {
     const big = Array.from({ length: 5000 }, () => 'same line').join('\n')
-    const decision = await runOne({
+    const decision = (await runOne({
       result: { isError: false, content: [{ type: 'text', text: big }] },
-    }) as { kind: string; content?: Array<{ text: string }> }
+    })) as { kind: string; content?: Array<{ text: string }> }
     expect(decision.kind).toBe('accept')
     expect(decision.content?.[0]?.text).toContain('omitted by dsh-terse')
   })
 
   it('leaves a downstream block untouched', async () => {
     const big = Array.from({ length: 5000 }, () => 'same line').join('\n')
-    const decision = await runOne({
+    const decision = (await runOne({
       result: { isError: false, content: [{ type: 'text', text: big }] },
       next: async () => ({ kind: 'block', feedback: [{ type: 'text', text: 'no' }] }),
-    }) as { kind: string; feedback: unknown }
+    })) as { kind: string; feedback: unknown }
     expect(decision.kind).toBe('block')
     expect(decision.feedback).toEqual([{ type: 'text', text: 'no' }])
   })
@@ -118,36 +131,39 @@ describe('post-execute behaviour', () => {
   it('skips the nudge on a concluding result', async () => {
     const { ctx, listeners } = fakeCtx()
     apply(ctx, { drift: { idleStepsBeforeNudge: 1 } })
-    const handler = emitter(listeners, 'tools/post-execute')[0] as Function
+    const handler = emitter(listeners, 'tools/post-execute')[0] as Listener
     const session = {}
     const exec = { agent: { session }, name: 'bash' }
     // Drive a step so the idle trigger is armed, then conclude the turn.
     for (const fn of emitter(listeners, 'session/event')) fn(session, { type: 'turn/start' })
     for (const fn of emitter(listeners, 'session/event')) fn(session, { type: 'step/start' })
-    const decision = await handler(
+    const decision = (await handler(
       exec,
       { isError: false, concludesTurn: true, content: [{ type: 'text', text: 'done' }] },
       async () => ({ kind: 'accept' }),
-    ) as { additionalContexts?: unknown[] }
+    )) as { additionalContexts?: unknown[] }
     expect(decision.additionalContexts).toBeUndefined()
   })
 
   it('caps nudges per turn even under repeated long replies', async () => {
     const { ctx, listeners } = fakeCtx()
     apply(ctx, { shaping: false, drift: { maxReplyTokens: 10, minReplyTokensToJudge: 5 } })
-    const handler = emitter(listeners, 'tools/post-execute')[0] as Function
+    const handler = emitter(listeners, 'tools/post-execute')[0] as Listener
     const session = {}
-    const long = { type: 'assistant/message', data: { message: { content: [{ type: 'text', text: 'word '.repeat(200) }] } } }
+    const long = {
+      type: 'assistant/message',
+      data: { message: { content: [{ type: 'text', text: 'word '.repeat(200) }] } },
+    }
     let nudges = 0
     for (const fn of emitter(listeners, 'session/event')) fn(session, { type: 'turn/start' })
     for (let step = 0; step < 8; step += 1) {
       for (const fn of emitter(listeners, 'session/event')) fn(session, { type: 'step/start' })
       for (const fn of emitter(listeners, 'session/event')) fn(session, long)
-      const decision = await handler(
+      const decision = (await handler(
         { agent: { session }, name: 'bash' },
         { isError: false, content: [{ type: 'text', text: 'ok' }] },
         async () => ({ kind: 'accept' }),
-      ) as { additionalContexts?: unknown[] }
+      )) as { additionalContexts?: unknown[] }
       if (decision.additionalContexts !== undefined) nudges += 1
     }
     expect(nudges).toBe(DRIFT_DEFAULTS.maxNudgesPerTurn)

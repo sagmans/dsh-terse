@@ -20,8 +20,9 @@ const releases: string[] = Object.keys(manifest.dsh.compatibility.dshReleases)
 
 /** Harness packages in one manifest field, by the scope every one of them shares. */
 const harnessIn = (field: string): Array<[string, string]> =>
-  Object.entries((manifest[field] ?? {}) as Record<string, string>)
-    .filter(([name]) => name.startsWith('@deepseek-ai/dsh-'))
+  Object.entries((manifest[field] ?? {}) as Record<string, string>).filter(([name]) =>
+    name.startsWith('@deepseek-ai/dsh-'),
+  )
 
 /** The numeric tuple a release or a range bound names, which is how npm compares prereleases. */
 const tuple = (version: string): number[] => version.split('-')[0]!.split('.').map(Number)
@@ -39,7 +40,7 @@ describe('harness matrix', () => {
     const peers = harnessIn('peerDependencies')
     expect(peers.length).toBeGreaterThan(0)
     for (const [name, declared] of peers) {
-      expect(name + ' declares ' + declared).toBe(name + ' declares ' + compatibility)
+      expect(`${name} declares ${declared}`).toBe(`${name} declares ${compatibility}`)
     }
   })
 
@@ -56,13 +57,18 @@ describe('harness matrix', () => {
     const upper = tuple(range![2]!)
     expect(releases.length).toBeGreaterThan(0)
     for (const release of releases) {
-      expect(compare(tuple(release), lower), release + ' is below ' + compatibility).toBeGreaterThanOrEqual(0)
-      expect(compare(tuple(release), upper), release + ' is above ' + compatibility).toBeLessThan(0)
+      expect(
+        compare(tuple(release), lower),
+        `${release} is below ${compatibility}`,
+      ).toBeGreaterThanOrEqual(0)
+      expect(compare(tuple(release), upper), `${release} is above ${compatibility}`).toBeLessThan(0)
     }
   })
 
   it('passes the offline guard', () => {
-    const output = execFileSync(process.execPath, [join(ROOT, 'tools/harness-matrix.mjs')], { encoding: 'utf8' })
+    const output = execFileSync(process.execPath, [join(ROOT, 'tools/harness-matrix.mjs')], {
+      encoding: 'utf8',
+    })
     expect(output).toContain('harness-matrix: ok')
   })
 })

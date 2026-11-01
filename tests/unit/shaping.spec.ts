@@ -1,10 +1,10 @@
 import { describe, expect, it } from 'vitest'
 import {
-  SHAPING_DEFAULTS,
   collapseDuplicateRuns,
   collapseRuns,
   elideMiddle,
   resolveShapingConfig,
+  SHAPING_DEFAULTS,
   shapeText,
   textOf,
 } from '@/shaping.ts'
@@ -75,7 +75,12 @@ describe('shapeText', () => {
 
 describe('textOf', () => {
   it('joins text blocks', () => {
-    expect(textOf([{ type: 'text', text: 'a' }, { type: 'text', text: 'b' }])).toBe('a\nb')
+    expect(
+      textOf([
+        { type: 'text', text: 'a' },
+        { type: 'text', text: 'b' },
+      ]),
+    ).toBe('a\nb')
   })
 
   it('returns undefined for a non-text block', () => {
@@ -93,6 +98,8 @@ describe('resolveShapingConfig', () => {
   })
 
   it('rejects head plus tail that leaves nothing to elide', () => {
-    expect(() => resolveShapingConfig({ maxResultChars: 100, headChars: 80, tailChars: 40 })).toThrow()
+    expect(() =>
+      resolveShapingConfig({ maxResultChars: 100, headChars: 80, tailChars: 40 }),
+    ).toThrow()
   })
 })

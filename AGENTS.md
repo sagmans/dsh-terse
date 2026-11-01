@@ -27,6 +27,7 @@ git commit -s -S -m "<conventional-commit message>"
 
 | Task | Command |
 | --- | --- |
+| Lint and format check (Biome) | `pnpm run lint` (`pnpm run lint:fix` repairs) |
 | Typecheck `src` and `tests` | `pnpm run typecheck` |
 | Unit tests | `pnpm test` |
 | One unit test | `pnpm vitest run tests/unit/drift.spec.ts -t "<name>"` |
@@ -153,4 +154,4 @@ with `DRY_RUN=1`.
 
 ## Git hooks
 
-Checks run in `.githooks/`, not in push/PR CI. Run `scripts/setup-hooks` after cloning. All checks must pass before you push. Never use `--no-verify`. `pre-push`: `npm audit signatures`, `pnpm run check`, `pnpm audit --audit-level high`.
+Checks run in `.githooks/`, not in push/PR CI. Run `scripts/setup-hooks` after cloning. All checks must pass before you push. Never use `--no-verify`. `pre-commit`: Biome on the staged files (`pnpm run lint:fix` repairs most findings). `pre-push`: `npm audit signatures`, `pnpm run check`, `pnpm audit --audit-level high`.

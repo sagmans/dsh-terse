@@ -1,9 +1,8 @@
 import assert from 'node:assert/strict'
-import { readFileSync, readdirSync } from 'node:fs'
+import { readdirSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
-import { pathToFileURL } from 'node:url'
-import { fileURLToPath } from 'node:url'
 import { test } from 'node:test'
+import { fileURLToPath, pathToFileURL } from 'node:url'
 
 /**
  * Prove the shipped artefact, not the sources.
@@ -24,7 +23,7 @@ const EXPECTED_MODULES = ['drift.js', 'index.js', 'instructions.js', 'shaping.js
 test('the build emits every advertised module', () => {
   const built = readdirSync(DIST)
   for (const module of EXPECTED_MODULES) {
-    assert.ok(built.includes(module), 'dist/' + module + ' is missing from the build')
+    assert.ok(built.includes(module), `dist/${module} is missing from the build`)
   }
 })
 
@@ -45,8 +44,14 @@ test('the entry point registers every layer on a context', async () => {
   const listeners = new Map()
   const ctx = {
     systemPrompt: {
-      section: (s) => { sections.push(s); return () => {} },
-      context: (c) => { contexts.push(c); return () => {} },
+      section: (s) => {
+        sections.push(s)
+        return () => {}
+      },
+      context: (c) => {
+        contexts.push(c)
+        return () => {}
+      },
     },
     on: (event, fn) => {
       const list = listeners.get(event) ?? []
@@ -70,6 +75,6 @@ test('every built module parses under the runtime it ships to', () => {
     // A syntax-level load is enough here; pack-smoke runs --check on the packed
     // copies, so this guards the checkout build without duplicating that scan.
     const source = readFileSync(join(DIST, module), 'utf8')
-    assert.ok(source.length > 0, 'dist/' + module + ' is empty')
+    assert.ok(source.length > 0, `dist/${module} is empty`)
   }
 })

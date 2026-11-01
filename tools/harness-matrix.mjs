@@ -25,7 +25,7 @@ const problems = []
 function compareVersions(left, right) {
   const parse = (value) => {
     const match = /^(\d+)\.(\d+)\.(\d+)(?:-([a-z]+)\.(\d+))?$/u.exec(value ?? '')
-    if (match === null) throw new Error('unsupported version: ' + String(value))
+    if (match === null) throw new Error(`unsupported version: ${String(value)}`)
     return {
       numbers: [Number(match[1]), Number(match[2]), Number(match[3])],
       prerelease: match[4] === undefined ? null : [match[4], Number(match[5])],
@@ -44,7 +44,9 @@ function compareVersions(left, right) {
 
 const range = /^>=(\S+) <(\S+)$/u.exec(compatibility ?? '')
 if (range === null) {
-  problems.push('dsh.compatibility.dsh must declare a ">=lower <upper" range, found ' + String(compatibility))
+  problems.push(
+    `dsh.compatibility.dsh must declare a ">=lower <upper" range, found ${String(compatibility)}`,
+  )
 }
 if (releases.length === 0) {
   problems.push('dsh.compatibility.dshReleases must name at least one verified release')
@@ -52,7 +54,9 @@ if (releases.length === 0) {
 if (range !== null) {
   for (const release of releases) {
     if (compareVersions(release, range[1]) < 0 || compareVersions(release, range[2]) >= 0) {
-      problems.push('verified release ' + release + ' lies outside the compatible range ' + compatibility)
+      problems.push(
+        `verified release ${release} lies outside the compatible range ${compatibility}`,
+      )
     }
   }
 }
@@ -62,26 +66,39 @@ if (range !== null) {
 // "0.1.7-rc.2". The peers therefore accept the whole range — that is the line a
 // profile installs this plugin against — while the packages the sources compile
 // against name one verified release, the way the harness's own bundles pin.
-const peers = Object.entries(manifest.peerDependencies ?? {})
-  .filter(([name]) => name.startsWith('@deepseek-ai/dsh-'))
-const compiled = Object.entries(manifest.devDependencies ?? {})
-  .filter(([name]) => name.startsWith('@deepseek-ai/dsh-'))
+const peers = Object.entries(manifest.peerDependencies ?? {}).filter(([name]) =>
+  name.startsWith('@deepseek-ai/dsh-'),
+)
+const compiled = Object.entries(manifest.devDependencies ?? {}).filter(([name]) =>
+  name.startsWith('@deepseek-ai/dsh-'),
+)
 if (peers.length === 0) problems.push('the manifest peers on no harness package')
 if (compiled.length === 0) problems.push('the manifest compiles against no harness package')
 
 for (const [name, declared] of peers) {
   if (declared !== compatibility) {
-    problems.push('peer package ' + name + ' declares ' + declared + ', not the compatible range ' + String(compatibility))
+    problems.push(
+      'peer package ' +
+        name +
+        ' declares ' +
+        declared +
+        ', not the compatible range ' +
+        String(compatibility),
+    )
   }
 }
 
 const compiledVersions = new Set(compiled.map(([, declared]) => declared))
 if (compiledVersions.size !== 1) {
-  problems.push('the harness devDependencies name ' + compiledVersions.size + ' versions, not one')
+  problems.push(`the harness devDependencies name ${compiledVersions.size} versions, not one`)
 }
 for (const version of compiledVersions) {
   if (!releases.includes(version)) {
-    problems.push('the harness devDependencies compile against ' + version + ', which is not a verified release')
+    problems.push(
+      'the harness devDependencies compile against ' +
+        version +
+        ', which is not a verified release',
+    )
   }
 }
 
@@ -90,31 +107,47 @@ for (const [name, declared] of Object.entries(manifest.dependencies ?? {})) {
   if (!String(declared).startsWith('npm:')) continue
   const aliased = /^npm:(.+)@([^@]+)$/u.exec(String(declared))
   if (aliased === null || !releases.includes(aliased[2])) {
-    problems.push('aliased dependency ' + name + ' declares ' + declared + ', whose version is not a verified release')
+    problems.push(
+      'aliased dependency ' +
+        name +
+        ' declares ' +
+        declared +
+        ', whose version is not a verified release',
+    )
   }
 }
 
 if (process.argv.includes('--check-registry')) {
   const response = await fetch('https://registry.npmjs.org/@deepseek-ai%2Fdsh')
   if (!response.ok) {
-    problems.push('the registry read failed with HTTP ' + response.status)
+    problems.push(`the registry read failed with HTTP ${response.status}`)
   } else {
     const metadata = await response.json()
     const latest = metadata['dist-tags']?.latest
     if (typeof latest !== 'string') {
       problems.push('the registry answered no latest dist-tag')
     } else if (!releases.includes(latest)) {
-      problems.push('the harness publishes ' + latest + ' as latest, which is not a verified release')
-      console.error('harness-matrix: add it to dsh.compatibility.dshReleases, raise the harness devDependencies, then dogfood; RELEASE.md owns the procedure')
+      problems.push(`the harness publishes ${latest} as latest, which is not a verified release`)
+      console.error(
+        'harness-matrix: add it to dsh.compatibility.dshReleases, raise the harness devDependencies, then dogfood; RELEASE.md owns the procedure',
+      )
     } else {
-      console.log('harness-matrix: registry latest ' + latest + ' is verified')
+      console.log(`harness-matrix: registry latest ${latest} is verified`)
     }
   }
 }
 
 if (problems.length > 0) {
   console.error('harness-matrix: the matrix is inconsistent')
-  for (const problem of problems) console.error('  - ' + problem)
+  for (const problem of problems) console.error(`  - ${problem}`)
   process.exit(1)
 }
-console.log('harness-matrix: ok (' + releases.length + ' verified, compiled ' + [...compiledVersions].join(', ') + ', peers ' + String(compatibility) + ')')
+console.log(
+  'harness-matrix: ok (' +
+    releases.length +
+    ' verified, compiled ' +
+    [...compiledVersions].join(', ') +
+    ', peers ' +
+    String(compatibility) +
+    ')',
+)

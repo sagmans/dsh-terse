@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import {
-  DRIFT_DEFAULTS,
   advance,
+  DRIFT_DEFAULTS,
   initialCounters,
   judgeReply,
   replyShape,
@@ -44,13 +44,13 @@ describe('judgeReply', () => {
   })
 
   it('does not flag a long reply that is mostly code', () => {
-    const code = '```ts\n' + 'const value = compute()\n'.repeat(200) + '```'
+    const code = `\`\`\`ts\n${'const value = compute()\n'.repeat(200)}\`\`\``
     expect(judgeReply(code, config)).toBeUndefined()
   })
 
   it('flags a long reply that is over budget but not prose-dominated', () => {
     // Half code, half plain text: passes the floor and the budget, fails the ratio.
-    const mixed = 'plain words here. '.repeat(120) + '```ts\n' + 'x = 1\n'.repeat(400) + '```'
+    const mixed = `${'plain words here. '.repeat(120)}\`\`\`ts\n${'x = 1\n'.repeat(400)}\`\`\``
     const signal = judgeReply(mixed, config)
     expect(signal === 'length' || signal === 'prose').toBe(true)
   })

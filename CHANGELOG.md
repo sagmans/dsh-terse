@@ -10,6 +10,7 @@ patch carries only fixes.
 
 ### Changed
 
+- Development checks lint and format the code with Biome `2.6.3`: the pre-commit hook checks the staged files, and `pnpm run check` checks the whole tree on every push. The code was reformatted once to the existing style. The published modules behave the same.
 - Publication is automatic on a signed `v*` tag push by an admin. The admin-only tag
   ruleset makes the tag push the release approval, so the `npm-release` environment no
   longer waits for a reviewer. The release helper creates and accepts that environment,

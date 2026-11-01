@@ -16,8 +16,5 @@
     "rewriteRelativeImportExtensions": false,
     "allowImportingTsExtensions": true
   },
-  "include": [
-    "src",
-    "tests"
-  ]
+  "include": ["src", "tests"]
 }

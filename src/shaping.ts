@@ -56,7 +56,10 @@ export interface ShapedText {
 }
 
 /** Collapse long runs of identical lines into one line plus a count. */
-export function collapseDuplicateRuns(text: string, minRun: number): { text: string; collapsed: number } {
+export function collapseDuplicateRuns(
+  text: string,
+  minRun: number,
+): { text: string; collapsed: number } {
   const lines = text.split('\n')
   const out: string[] = []
   let collapsed = 0
@@ -154,13 +157,21 @@ export function shapeText(text: string, config: ShapingConfig): ShapedText {
 /** Validate and apply defaults; fail loud rather than silently shape nothing. */
 export function resolveShapingConfig(config: Partial<ShapingConfig> = {}): ShapingConfig {
   const resolved: ShapingConfig = {
-    maxResultChars: positive('maxResultChars', config.maxResultChars ?? SHAPING_DEFAULTS.maxResultChars),
+    maxResultChars: positive(
+      'maxResultChars',
+      config.maxResultChars ?? SHAPING_DEFAULTS.maxResultChars,
+    ),
     headChars: positive('headChars', config.headChars ?? SHAPING_DEFAULTS.headChars),
     tailChars: positive('tailChars', config.tailChars ?? SHAPING_DEFAULTS.tailChars),
-    duplicateRunMin: positive('duplicateRunMin', config.duplicateRunMin ?? SHAPING_DEFAULTS.duplicateRunMin),
+    duplicateRunMin: positive(
+      'duplicateRunMin',
+      config.duplicateRunMin ?? SHAPING_DEFAULTS.duplicateRunMin,
+    ),
   }
   if (resolved.headChars + resolved.tailChars >= resolved.maxResultChars) {
-    throw new Error('dsh-terse: headChars + tailChars must be less than maxResultChars, else elision cannot shrink')
+    throw new Error(
+      'dsh-terse: headChars + tailChars must be less than maxResultChars, else elision cannot shrink',
+    )
   }
   return resolved
 }

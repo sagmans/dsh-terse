@@ -82,8 +82,7 @@ helpers, or config.`
  * fades. Kept to one line and changed only on real state change to avoid
  * disturbing the cached prefix.
  */
-export const STANDING_REMINDER =
-  `<system-reminder>dsh-terse active: keep replies compressed; code, paths, commands, and exact errors verbatim.</system-reminder>`
+export const STANDING_REMINDER = `<system-reminder>dsh-terse active: keep replies compressed; code, paths, commands, and exact errors verbatim.</system-reminder>`
 
 /**
  * The event-driven nudge.
@@ -92,8 +91,7 @@ export const STANDING_REMINDER =
  * generation time — and stays under the notice summary bound. It states the
  * omission, not a lecture, so it steers without spending a turn.
  */
-export const DRIFT_NUDGE =
-  `<system-reminder>dsh-terse: reply ran long. Compress prose; keep code, paths, commands, and exact errors exact.</system-reminder>`
+export const DRIFT_NUDGE = `<system-reminder>dsh-terse: reply ran long. Compress prose; keep code, paths, commands, and exact errors exact.</system-reminder>`
 
 /**
  * One-line account shown on the collapsed transcript row for a nudge.

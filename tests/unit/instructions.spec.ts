@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest'
+import { replyShape } from '@/drift.ts'
 import {
   CONSTITUTION,
   CONSTITUTION_ORDER,
@@ -6,14 +7,20 @@ import {
   STANDING_ORDER,
   STANDING_REMINDER,
 } from '@/instructions.ts'
-import { replyShape } from '@/drift.ts'
 
 describe('constitution', () => {
   it('keeps every never-cut class named', () => {
     for (const token of ['not', 'never', 'no', 'only', 'except']) {
       expect(CONSTITUTION).toContain(token)
     }
-    for (const concept of [/numbers/i, /units/i, /identifiers/i, /paths/i, /commands/i, /exact error strings/i]) {
+    for (const concept of [
+      /numbers/i,
+      /units/i,
+      /identifiers/i,
+      /paths/i,
+      /commands/i,
+      /exact error strings/i,
+    ]) {
       expect(CONSTITUTION).toMatch(concept)
     }
   })

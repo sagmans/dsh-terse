@@ -85,9 +85,7 @@ export function replyShape(text: string): ReplyShape {
   const chars = text.replace(/\s/g, '').length
   // Fenced blocks, then inline spans, are removed before prose is measured:
   // compression must never touch code, so code must never raise the prose ratio.
-  const withoutFences = text.replace(/```[\s\S]*?```/g, (block) => {
-    return ''
-  })
+  const withoutFences = text.replace(/```[\s\S]*?```/g, () => '')
   const inlineStripped = withoutFences.replace(/`[^`\n]*`/g, '')
   const proseChars = inlineStripped.replace(/\s/g, '').length
   const fencedBlocks = (text.match(/```/g)?.length ?? 0) / 2
@@ -178,7 +176,11 @@ export function advance(counters: DriftCounters, type: string): void {
  * @param config - resolved drift configuration.
  * @returns whether to emit the nudge this step.
  */
-export function shouldNudge(counters: DriftCounters, reply: string | undefined, config: DriftConfig): boolean {
+export function shouldNudge(
+  counters: DriftCounters,
+  reply: string | undefined,
+  config: DriftConfig,
+): boolean {
   if (counters.nudgedThisStep || counters.nudges >= config.maxNudgesPerTurn) return false
   const signal = reply === undefined ? undefined : judgeReply(reply, config)
   const idle = counters.stepsSinceNudge >= config.idleStepsBeforeNudge
@@ -192,7 +194,10 @@ export function shouldNudge(counters: DriftCounters, reply: string | undefined, 
 /** Validate and apply defaults; fail loud rather than silently guard nothing. */
 export function resolveDriftConfig(config: Partial<DriftConfig> = {}): DriftConfig {
   return {
-    maxReplyTokens: positive('maxReplyTokens', config.maxReplyTokens ?? DRIFT_DEFAULTS.maxReplyTokens),
+    maxReplyTokens: positive(
+      'maxReplyTokens',
+      config.maxReplyTokens ?? DRIFT_DEFAULTS.maxReplyTokens,
+    ),
     minReplyTokensToJudge: positive(
       'minReplyTokensToJudge',
       config.minReplyTokensToJudge ?? DRIFT_DEFAULTS.minReplyTokensToJudge,
@@ -206,7 +211,10 @@ export function resolveDriftConfig(config: Partial<DriftConfig> = {}): DriftConf
       'idleStepsBeforeNudge',
       config.idleStepsBeforeNudge ?? DRIFT_DEFAULTS.idleStepsBeforeNudge,
     ),
-    maxNudgesPerTurn: positive('maxNudgesPerTurn', config.maxNudgesPerTurn ?? DRIFT_DEFAULTS.maxNudgesPerTurn),
+    maxNudgesPerTurn: positive(
+      'maxNudgesPerTurn',
+      config.maxNudgesPerTurn ?? DRIFT_DEFAULTS.maxNudgesPerTurn,
+    ),
   }
 }
 
