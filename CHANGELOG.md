@@ -8,6 +8,14 @@ carry a breaking change, and a patch carries only fixes.
 
 ## [Unreleased]
 
+### Fixed
+
+- The harness peers accept DeepSeek Harness `0.2.1-rc.x`, so npm installs the
+  plugin beside the current `latest` harness, `0.2.1-rc.5`. The range keeps one
+  alternative per prerelease line, and the matrix guard reads that form.
+  Verified against `0.2.1-rc.5`. Development installs lift the zod and undici
+  releases that harness pins to their patched releases.
+
 ### Changed
 
 - Development checks lint and format the code with Biome `2.6.3`: the pre-commit

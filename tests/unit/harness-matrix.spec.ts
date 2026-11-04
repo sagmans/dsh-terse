@@ -8,7 +8,7 @@ import { describe, expect, it } from 'vitest'
  * The harness matrix, read from the manifest the tarball ships.
  *
  * These are the release policy's rules, which `tools/harness-matrix.mjs` guards
- * in CI: the peers accept the whole compatible range, and the harness
+ * in the pre-push hook: the peers accept the whole compatible range, and the harness
  * devDependencies name one verified release, because npm reaches a prerelease
  * only through a range comparator naming its own `X.Y.Z` tuple — no single
  * range spans two prerelease lines.
@@ -51,17 +51,23 @@ describe('harness matrix', () => {
   })
 
   it('lists only verified releases inside the compatible range', () => {
-    const range = /^>=(\S+) <(\S+)$/u.exec(compatibility)
-    expect(range).not.toBeNull()
-    const lower = tuple(range![1]!)
-    const upper = tuple(range![2]!)
+    // One `>=lower <upper` alternative per prerelease line, joined by `||`, so
+    // npm reaches each line through a bound that names its own tuple.
+    const alternatives = compatibility.split('||').map((part) => {
+      const bounds = /^>=(\S+) <(\S+)$/u.exec(part.trim())
+      expect(bounds, `${part.trim()} is not a >=lower <upper alternative`).not.toBeNull()
+      return { lower: bounds![1]!, upper: bounds![2]! }
+    })
     expect(releases.length).toBeGreaterThan(0)
     for (const release of releases) {
-      expect(
-        compare(tuple(release), lower),
-        `${release} is below ${compatibility}`,
-      ).toBeGreaterThanOrEqual(0)
-      expect(compare(tuple(release), upper), `${release} is above ${compatibility}`).toBeLessThan(0)
+      const inside = alternatives.some(
+        ({ lower, upper }) =>
+          compare(tuple(release), tuple(lower)) >= 0 &&
+          compare(tuple(release), tuple(upper)) < 0 &&
+          // npm admits a prerelease only through a bound on its own tuple.
+          (!release.includes('-') || compare(tuple(release), tuple(lower)) === 0),
+      )
+      expect(inside, `${release} is outside ${compatibility}`).toBe(true)
     }
   })
 

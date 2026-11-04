@@ -18,11 +18,12 @@ not.
    `pnpm run test:build`, `pnpm test:release`, `pnpm run pack-smoke`, `pnpm run
    harness-matrix`, `npm audit signatures`, and `pnpm audit --audit-level high`.
 4. Dogfooding: install the packed candidate into a plugin profile whose harness
-   is a supported line (`>=0.1.5-rc.1 <0.3.0`) and drive a real session. Confirm
-   the constitution section and standing reminder appear, that tool output above
-   the shaping threshold is elided with a locator, and that the nudge fires only
-   after a genuinely long turn. Unit tests do not prove the row composes into a
-   live profile's prompt or that elision stays reversible in a real session.
+   is a supported line (`dsh.compatibility.dsh` in `package.json`) and drive a
+   real session. Confirm the constitution section and standing reminder appear,
+   that tool output above the shaping threshold is elided with a locator, and
+   that the nudge fires only after a genuinely long turn. Unit tests do not
+   prove the row composes into a live profile's prompt or that elision stays
+   reversible in a real session.
 5. README accuracy pass: every documented command, profile path, and
    configuration reference still behaves as written.
 6. A published npm version is immutable. A broken release is forward-fixed,
