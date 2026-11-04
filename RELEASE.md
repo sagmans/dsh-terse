@@ -205,11 +205,10 @@ git push origin "v${PKG_VERSION}"
 The tag push is the release approval: the ruleset admits only admins to `v*`
 tags, so a signed tag push by an admin publishes automatically. `release.yml`
 checks that the tag matches the version and the dependency signatures, then
-publishes on the `npm-release` environment and publishes through OIDC trusted
-publishing with automatic
-provenance. No second approval follows the push, so confirm every gate before
-you push the tag. Create the GitHub release from the tag using the drafted notes
-after publication succeeds.
+publishes on the `npm-release` environment through OIDC trusted publishing with
+automatic provenance. No second approval follows the push, so confirm every
+gate before you push the tag. Create the GitHub release from the tag using the
+drafted notes after publication succeeds.
 
 ## Rollback
 
