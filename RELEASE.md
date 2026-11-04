@@ -12,8 +12,9 @@ not.
 
 ## Gates — all required before tagging
 
-1. Candidate lands on `main` through a reviewed PR (squash merge).
-2. `verify` CI green on the exact merged SHA.
+1. Candidate lands on `main` as reviewed, signed commits.
+2. The `pre-push` hooks passed on the exact pushed SHA. No hosted workflow runs
+   checks; the hooks are the gate.
 3. Locally on that SHA: `pnpm run typecheck`, `pnpm test`, `pnpm run build`,
    `pnpm run test:build`, `pnpm test:release`, `pnpm run pack-smoke`, `pnpm run
    harness-matrix`, `npm audit signatures`, and `pnpm audit --audit-level high`.
@@ -94,10 +95,10 @@ repository: `PKG_VERSION`, `SOURCE_SHA`, `ARTIFACT`, `ARTIFACT_INTEGRITY`.
 
 The helper is [`scripts/npm/release.py`](scripts/npm/release.py); [`pnpm
 test:release`](tests/release) exercises its guards through synthetic CLIs, and
-CI runs that suite on every change. No helper action writes to npm or GitHub
-without its own `CONFIRM=<action>` value. `DRY_RUN=1` prints the exact mutation
-instead of running it. Reading this policy, passing preflight, or exporting a
-variable is not approval.
+the `pre-push` hook runs that suite on every push. No helper action writes to
+npm or GitHub without its own `CONFIRM=<action>` value. `DRY_RUN=1` prints the
+exact mutation instead of running it. Reading this policy, passing preflight, or
+exporting a variable is not approval.
 
 The helper rejects a redirected registry before it acts: it reads the effective
 `registry` and `@sagmans:registry` configuration and fails closed unless both
@@ -115,7 +116,7 @@ Prerequisites: `python3` 3.11 or newer, npm 11.15.0 or newer, authenticated
 ## First publication (`v0.1.0` only)
 
 npm requires a package to exist before trusted publishing can be configured, so
-the `v0.1.0` tag verifies but skips the publish job in
+the `v0.1.0` tag skips the publish job in
 [`release.yml`](.github/workflows/release.yml). The release owner publishes that
 version by hand from a clean checkout of the exact signed tag. Keep the reviewed
 artefact outside the checkout and unchanged until publication completes.
@@ -203,8 +204,9 @@ git push origin "v${PKG_VERSION}"
 
 The tag push is the release approval: the ruleset admits only admins to `v*`
 tags, so a signed tag push by an admin publishes automatically. `release.yml`
-re-verifies the candidate, then the publish job runs on the `npm-release`
-environment and publishes through OIDC trusted publishing with automatic
+checks that the tag matches the version and the dependency signatures, then
+publishes on the `npm-release` environment and publishes through OIDC trusted
+publishing with automatic
 provenance. No second approval follows the push, so confirm every gate before
 you push the tag. Create the GitHub release from the tag using the drafted notes
 after publication succeeds.

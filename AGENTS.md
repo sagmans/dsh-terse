@@ -112,9 +112,9 @@ schemastery, and cordis-plugin names those lines resolve, and the 0.2.0 line's
 `@earendil-works/pi-ai` runtime excluded, and a package whose install runs a
 build step stays blocked until it is listed in `allowBuilds`.
 `.github/dependabot.yml` repeats that window as a 7-day cooldown and ignores the
-transitive `@vitest/mocker` major and minor raises the runner cannot take. CI
-adds `npm audit signatures` and `pnpm audit --audit-level high` on top of
-`pnpm run check`.
+transitive `@vitest/mocker` major and minor raises the runner cannot take. The
+`pre-push` hook adds `npm audit signatures`, `pnpm audit --audit-level high`,
+and a whole-tree semgrep scan on top of `pnpm run check`.
 
 **The constitution is size-guarded on purpose.** It is input cost on every call;
 a spec fails if it grows past 360 estimated tokens (a crude estimate that
@@ -171,11 +171,12 @@ broken packages as `RELEASE.md` directs. Helper mutations require
 
 ## Git hooks
 
-Checks run in `.githooks/`, not in push/PR CI. Run `scripts/setup-hooks` after
+Checks run in `.githooks/`, not in hosted CI. Run `scripts/setup-hooks` after
 cloning. All checks must pass before you push. Never use `--no-verify`.
 `pre-commit`: Biome on the staged files (`pnpm run lint:fix` repairs most
 findings). `pre-push`: `npm audit signatures`, `pnpm run check`,
-`pnpm audit --audit-level high`.
+`pnpm audit --audit-level high`, and a semgrep scan of every tracked source
+file. No hosted workflow runs checks.
 
 Commit messages follow `.githooks/GIT_CONVENTION.md`, which `commit-msg` and
 `pre-push` enforce. The generic checks need gitleaks, osv-scanner, semgrep,

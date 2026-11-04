@@ -18,6 +18,9 @@ carry a breaking change, and a patch carries only fixes.
 
 ### Changed
 
+- No hosted workflow runs checks. The local `pre-push` hook is the only gate,
+  and it now also scans every tracked source file with semgrep. The tag
+  workflow only guards and publishes, and it restores no dependency cache.
 - Development checks lint and format the code with Biome `2.6.3`: the pre-commit
   hook checks the staged files, and `pnpm run check` checks the whole tree on
   every push. The code was reformatted once to the existing style. The published

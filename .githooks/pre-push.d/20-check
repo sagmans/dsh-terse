@@ -1,14 +1,50 @@
 #!/bin/sh
-# Runs the full check suite and the audits hosted CI ran on every push, on
-# each pushed commit. Telemetry stays off for every harness the tests start.
+# Runs the full check suite, the dependency audits, and a whole-tree static
+# analysis on each pushed commit. These hooks are the only gate: no hosted
+# workflow checks the code. Telemetry stays off for every harness the tests
+# start.
 set -eu
 DSH_TELEMETRY_DISABLED=1
 export DSH_TELEMETRY_DISABLED
+
+# The shared pre-push SAST only reads the files a push changes, so code that
+# predates a rule is never seen again. This pass reads every tracked source
+# file, offline, and fails closed. The rules come from the running hook, not
+# from the pushed commit, so a commit cannot weaken the rules it is judged by.
+SAST_RULES="$(dirname -- "${HOOK_HELPERS:?run from .githooks (scripts/setup-hooks)}")/semgrep"
+
+sast_full() {
+	if ! command -v semgrep >/dev/null 2>&1; then
+		echo "pre-push: semgrep not found; install it (brew install semgrep)" >&2
+		return 1
+	fi
+	sast_list=$(mktemp "${TMPDIR:-/tmp}/pre-push-sast.XXXXXX") || return 1
+	# The same file types as the shared check (lib/checks/sast.sh), quoted so
+	# git, not the shell, matches them at every depth. A listing that fails
+	# must block, so it goes to a file instead of a pipe.
+	if ! git ls-files -z -- '*.js' '*.jsx' '*.mjs' '*.cjs' '*.ts' '*.tsx' \
+		'*.mts' '*.cts' '*.py' '*.go' '*.sh' '*.bash' '*Dockerfile*' \
+		>"$sast_list"; then
+		rm -f -- "$sast_list"
+		return 1
+	fi
+	# An empty list would make semgrep scan the whole working directory.
+	if [ ! -s "$sast_list" ]; then
+		rm -f -- "$sast_list"
+		return 0
+	fi
+	xargs -0 semgrep scan --config "$SAST_RULES" --error --metrics=off \
+		--disable-version-check --quiet <"$sast_list"
+	sast_status=$?
+	rm -f -- "$sast_list"
+	return "$sast_status"
+}
 
 checks() {
 	npm audit signatures || return 1
 	pnpm run check || return 1
 	pnpm audit --audit-level high || return 1
+	sast_full || return 1
 }
 
 # Helpers (staged_git, pushed_shas, at_sha, darwin_only) from .githooks/lib.
