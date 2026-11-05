@@ -29,14 +29,16 @@
   "javascript": {
     "formatter": { "quoteStyle": "single", "semicolons": "asNeeded", "trailingCommas": "all" }
   },
-  "linter": { "enabled": true, "rules": { "preset": "recommended" } },
-  "overrides": [
-    {
-      // Info, not an error, in tests only: a test reads fixture values it has
-      // just asserted to exist, and `!` there fails as loudly as an assertion.
-      "includes": ["tests/**"],
-      "linter": { "rules": { "style": { "noNonNullAssertion": "info" } } }
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "preset": "recommended",
+      "style": {
+        // The recommended preset only warns; an absent value hidden by `!` must stop
+        // every lint run, with or without its warnings flag.
+        "noNonNullAssertion": "error"
+      }
     }
-  ],
+  },
   "assist": { "enabled": true }
 }

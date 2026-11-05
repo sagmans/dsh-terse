@@ -18,6 +18,8 @@ carry a breaking change, and a patch carries only fixes.
 
 ### Changed
 
+- Biome now refuses non-null assertions in the tests too. The harness matrix
+  spec reports a malformed range alternative by its text.
 - No hosted workflow runs checks. The local `pre-push` hook is the only gate,
   and it now also scans every tracked source file with semgrep. The tag
   workflow only guards and publishes, and it restores no dependency cache.
