@@ -70,9 +70,10 @@
     "test:release": "python3 -m unittest discover -s tests/release -p 'test_*.py'",
     "pack-smoke": "node tools/pack-smoke.mjs",
     "harness-matrix": "node tools/harness-matrix.mjs",
+    "release-age-policy": "node tools/release-age-policy.mjs",
     "lint": "biome ci --error-on-warnings .",
     "lint:fix": "biome check --write .",
-    "check": "pnpm run lint && pnpm run typecheck && pnpm test && pnpm run build && pnpm run test:build && pnpm test:release && pnpm run pack-smoke && pnpm run harness-matrix",
+    "check": "pnpm run lint && pnpm run typecheck && pnpm test && pnpm run build && pnpm run test:build && pnpm test:release && pnpm run pack-smoke && pnpm run harness-matrix && pnpm run release-age-policy",
     "prepare": "npm run build",
     "prepack": "npm run build",
     "prepublishOnly": "pnpm run typecheck && pnpm test && pnpm test:release"

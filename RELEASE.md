@@ -17,7 +17,8 @@ not.
    checks; the hooks are the gate.
 3. Locally on that SHA: `pnpm run typecheck`, `pnpm test`, `pnpm run build`,
    `pnpm run test:build`, `pnpm test:release`, `pnpm run pack-smoke`, `pnpm run
-   harness-matrix`, `npm audit signatures`, and `pnpm audit --audit-level high`.
+   harness-matrix`, `pnpm run release-age-policy`, `npm audit signatures`, and
+   `pnpm audit --audit-level high`.
 4. Dogfooding: install the packed candidate into a plugin profile whose harness
    is a supported line (`dsh.compatibility.dsh` in `package.json`) and drive a
    real session. Confirm the constitution section and standing reminder appear,
@@ -60,8 +61,12 @@ That is the matrix bump, and it is a release-sized change:
    `devDependencies` to it; the peers stay on `dsh.compatibility.dsh`.
 3. `pnpm install`, then run every gate in
    [Gates](#gates--all-required-before-tagging). A release inside the quarantine
-   window needs its name — or the publisher names it resolves — in
-   `minimumReleaseAgeExclude` of `pnpm-workspace.yaml`, which states why.
+   window needs one exact-version row (`<package>@<version>`) in
+   `minimumReleaseAgeExclude` of `pnpm-workspace.yaml` for every package it
+   resolves, and each row states the date it leaves the window.
+   `tools/release-age-policy.mjs` refuses a bare name or a name pattern, because
+   either exempts every later release of that package too. Remove the rows after
+   that date.
 4. Dogfood a real session against the new release before it ships: install the
    packed candidate into a cloned profile and drive the surface per
    [README](README.md#try-it-in-the-tui).

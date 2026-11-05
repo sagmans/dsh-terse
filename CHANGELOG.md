@@ -45,6 +45,10 @@ carry a breaking change, and a patch carries only fixes.
   push to `main`, not through a pull request.
 - `RELEASE.md` states the trunk-based delivery flow: a harness matrix bump lands
   on `main`, and the release tag goes on the candidate commit.
+- `tools/release-age-policy.mjs` guards the quarantine exemptions in
+  `pnpm-workspace.yaml`: each row names one package at one exact version, that
+  version resolves in the lockfile, and no row repeats. `pnpm run check` runs
+  it, so a wide or stale row fails before a push.
 
 ### Security
 
@@ -72,6 +76,12 @@ carry a breaking change, and a patch carries only fixes.
   (TLS hostname check bypass). An exact pin means the release can no longer
   verify or publish on an unpatched cached runtime. Checks and tests pass on
   `24.22.1`. The published package is unchanged.
+- The release-age quarantine now exempts exact versions only. Every package of
+  the `0.2.2-rc.1` harness line, the framework row it peers on, and the
+  `@earendil-works` runtime are listed as `<package>@<version>`, so a later
+  release of any of them waits the full window again. The `fast-uri` `3.1.9`
+  and `libreoffice-kit` `0.1.5` rows are gone, because both releases aged out.
+  The published package is unchanged.
 
 ## [0.2.1] - 2026-10-14
 

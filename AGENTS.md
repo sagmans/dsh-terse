@@ -37,6 +37,7 @@ git commit -s -S -m "<conventional-commit message>"
 | Release-guard tests (synthetic CLIs, no writes) | `pnpm test:release` |
 | Packed-tarball smoke test | `pnpm run pack-smoke` |
 | Harness-matrix guard | `pnpm run harness-matrix` |
+| Release-age exemption guard | `pnpm run release-age-policy` |
 | All of the above | `pnpm run check` |
 | Dogfood on the real tui profile | `./scripts/dogfood/run-terse-from-worktree.sh` (`--profile <name>`, `--status`, `--clean`, `--no-launch`) |
 
@@ -73,6 +74,9 @@ never load the real harness.
   `scripts/npm/github_release.py` adds the create-only GitHub controls behind
   the same gate, and `tools/pack-smoke.mjs` proves the tarball ships what the
   manifest points at.
+- `tools/release-age-policy.mjs` guards the quarantine exemptions in
+  `pnpm-workspace.yaml`: each row names one package at one exact version, and
+  that version resolves in the lockfile.
 - the tracked `pre-push` hook (`.githooks/`) gates every change; `release.yml`
   publishes on a `v*` tag through npm OIDC trusted publishing on the tag-only
   `npm-release` environment, with no further approval: the admin-only tag
@@ -107,14 +111,16 @@ matrix and [RELEASE.md](RELEASE.md#harness-matrix) owns the bump; moving one
 side alone is the drift the guard exists to catch.
 
 **Dependencies resolve under quarantine.** `pnpm-workspace.yaml` sets
-`minimumReleaseAge: 10080` with the harness lines, the publisher's cordis,
-schemastery, and cordis-plugin names those lines resolve, and the 0.2.0 line's
-`@earendil-works/pi-ai` runtime excluded, and a package whose install runs a
-build step stays blocked until it is listed in `allowBuilds`.
-`.github/dependabot.yml` repeats that window as a 7-day cooldown and ignores the
-transitive `@vitest/mocker` major and minor raises the runner cannot take. The
-`pre-push` hook adds `npm audit signatures`, `pnpm audit --audit-level high`,
-and a whole-tree semgrep scan on top of `pnpm run check`.
+`minimumReleaseAge: 10080` and exempts the releases that are younger than the
+window. A row names one package at one exact version and states when it leaves
+the window; the `tools/release-age-policy.mjs` guard fails on a bare name, a
+name pattern, a union, a duplicated row, or a row the lockfile no longer
+resolves. A package whose install runs a build step stays blocked until it is
+listed in `allowBuilds`. `.github/dependabot.yml` repeats that window as a
+7-day cooldown and ignores the transitive `@vitest/mocker` major and minor
+raises the runner cannot take. The `pre-push` hook adds `npm audit signatures`,
+`pnpm audit --audit-level high`, and a whole-tree semgrep scan on top of
+`pnpm run check`.
 
 **The constitution is size-guarded on purpose.** It is input cost on every call;
 a spec fails if it grows past 360 estimated tokens (a crude estimate that
