@@ -47,7 +47,10 @@ carry a breaking change, and a patch carries only fixes.
   on `main`, and the release tag goes on the candidate commit.
 - `tools/release-age-policy.mjs` guards the quarantine exemptions in
   `pnpm-workspace.yaml`: each row names one package at one exact version, that
-  version resolves in the lockfile, and no row repeats. `pnpm run check` runs
+  version resolves in the lockfile, and no row repeats. A window of zero, a
+  value after the key, a flow list, a repeated key, an explicit YAML key, a key
+  with a space before the colon, a CRLF checkout, or another unreadable form
+  fails, so the guard cannot pass a list it never read. `pnpm run check` runs
   it, so a wide or stale row fails before a push.
 
 ### Security
@@ -80,8 +83,8 @@ carry a breaking change, and a patch carries only fixes.
   the `0.2.2-rc.1` harness line, the framework row it peers on, and the
   `@earendil-works` runtime are listed as `<package>@<version>`, so a later
   release of any of them waits the full window again. The `fast-uri` `3.1.9`
-  and `libreoffice-kit` `0.1.5` rows are gone, because both releases aged out.
-  The published package is unchanged.
+  row and the `libreoffice-kit*` pattern are gone, because both releases aged
+  out. The published package is unchanged.
 
 ## [0.2.1] - 2026-10-14
 

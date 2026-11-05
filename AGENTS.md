@@ -114,13 +114,13 @@ side alone is the drift the guard exists to catch.
 `minimumReleaseAge: 10080` and exempts the releases that are younger than the
 window. A row names one package at one exact version and states when it leaves
 the window; the `tools/release-age-policy.mjs` guard fails on a bare name, a
-name pattern, a union, a duplicated row, or a row the lockfile no longer
-resolves. A package whose install runs a build step stays blocked until it is
-listed in `allowBuilds`. `.github/dependabot.yml` repeats that window as a
-7-day cooldown and ignores the transitive `@vitest/mocker` major and minor
-raises the runner cannot take. The `pre-push` hook adds `npm audit signatures`,
-`pnpm audit --audit-level high`, and a whole-tree semgrep scan on top of
-`pnpm run check`.
+name pattern, a union, a duplicated row, a row the lockfile no longer resolves,
+a window of zero, and any block form it cannot read. A package whose install
+runs a build step stays blocked until it is listed in `allowBuilds`.
+`.github/dependabot.yml` repeats that window as a 7-day cooldown and ignores the
+transitive `@vitest/mocker` major and minor raises the runner cannot take. The
+`pre-push` hook adds `npm audit signatures`, `pnpm audit --audit-level high`,
+and a whole-tree semgrep scan on top of `pnpm run check`.
 
 **The constitution is size-guarded on purpose.** It is input cost on every call;
 a spec fails if it grows past 360 estimated tokens (a crude estimate that
