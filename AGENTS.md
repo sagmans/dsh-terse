@@ -13,10 +13,10 @@ Release policy: [RELEASE.md](RELEASE.md).
 
 ## Contributing
 
-**`main` is PR-only. Never commit or push to it, not even a one-line fix.** Work
-in a worktree on a feature branch, open a pull request, and let it merge there.
-A fix small enough to feel exempt is the one most likely to skip review, so
-there is no size that makes a direct push acceptable.
+Delivery is trunk-based: commit on `main` and push `main`, with no feature
+branch or pull request unless the maintainer asks for one. The local hooks are
+the gate before `origin`. Rebase on `origin/main` before each push, and never
+force-push `main`.
 
 Commits are signed and carry DCO:
 
@@ -134,15 +134,16 @@ errors are never shaped. A lossy cut here would cost a whole debugging loop.
 ## Release and publication
 
 Read [RELEASE.md](RELEASE.md) before preparing a version, pushing a release tag,
-publishing, or repairing a release record. Shipping a documentation or code PR
-is not approval to publish. Require explicit maintainer approval for publication
-and each remote release action; never publish on your own initiative.
+publishing, or repairing a release record. Pushing a documentation or code
+change is not approval to publish. Require explicit maintainer approval for
+publication and each remote release action; never publish on your own
+initiative.
 
-1. Land the candidate through a reviewed PR to `main`. Match `package.json`
-   `version`, the `vX.Y.Z` tag, and the versioned `CHANGELOG.md` entry.
-   Pass the release gates in `RELEASE.md` on the exact merged commit.
+1. Land the candidate on `main`. Match `package.json` `version`, the `vX.Y.Z`
+   tag, and the versioned `CHANGELOG.md` entry.
+   Pass the release gates in `RELEASE.md` on the exact pushed commit.
 2. Create an annotated, signed tag on that commit:
-   `git tag -s -a "vX.Y.Z" -m "vX.Y.Z" <merged-sha>`.
+   `git tag -s -a "vX.Y.Z" -m "vX.Y.Z" <candidate-sha>`.
    Verify it with `git verify-tag "vX.Y.Z"`. Never use a lightweight or unsigned
    release tag; require GitHub to verify the signature after the approved push.
 3. Push only that tag with `git push origin "vX.Y.Z"` after approval.

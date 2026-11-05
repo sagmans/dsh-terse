@@ -30,6 +30,8 @@ carry a breaking change, and a patch carries only fixes.
   environment no longer waits for a reviewer. The release helper creates and
   accepts that environment, and `RELEASE.md` documents how to restore a reviewer
   gate.
+- `AGENTS.md` states the trunk-based delivery flow: changes land by a signed
+  push to `main`, not through a pull request.
 
 ### Security
 
