@@ -25,12 +25,16 @@ const harnessIn = (field: string): Array<[string, string]> =>
   )
 
 /** The numeric tuple a release or a range bound names, which is how npm compares prereleases. */
-const tuple = (version: string): number[] => version.split('-')[0]!.split('.').map(Number)
+const tuple = (version: string): number[] => {
+  const [release = version] = version.split('-')
+  return release.split('.').map(Number)
+}
 
 /** Lexicographic tuple order; prerelease suffixes only ever vary inside one tuple. */
 const compare = (left: number[], right: number[]): number => {
   for (let index = 0; index < 3; index += 1) {
-    if (left[index] !== right[index]) return left[index]! - right[index]!
+    const gap = (left[index] ?? 0) - (right[index] ?? 0)
+    if (gap !== 0) return gap
   }
   return 0
 }
@@ -54,9 +58,10 @@ describe('harness matrix', () => {
     // One `>=lower <upper` alternative per prerelease line, joined by `||`, so
     // npm reaches each line through a bound that names its own tuple.
     const alternatives = compatibility.split('||').map((part) => {
-      const bounds = /^>=(\S+) <(\S+)$/u.exec(part.trim())
-      expect(bounds, `${part.trim()} is not a >=lower <upper alternative`).not.toBeNull()
-      return { lower: bounds![1]!, upper: bounds![2]! }
+      const [, lower, upper] = /^>=(\S+) <(\S+)$/u.exec(part.trim()) ?? []
+      if (lower === undefined || upper === undefined)
+        throw new Error(`${part.trim()} is not a >=lower <upper alternative`)
+      return { lower, upper }
     })
     expect(releases.length).toBeGreaterThan(0)
     for (const release of releases) {
