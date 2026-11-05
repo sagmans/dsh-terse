@@ -20,6 +20,10 @@ carry a breaking change, and a patch carries only fixes.
 
 - Biome now refuses non-null assertions in the tests too. The harness matrix
   spec reports a malformed range alternative by its text.
+- The pre-push hook now stops a step that hangs. Network reads, installs, test
+  suites, builds and daemon calls each run under a limit. At the limit, the push
+  fails and names the step and the elapsed time. The limits are constants at the
+  top of each check.
 - No hosted workflow runs checks. The local `pre-push` hook is the only gate,
   and it now also scans every tracked source file with semgrep. The tag
   workflow only guards and publishes, and it restores no dependency cache.

@@ -7,11 +7,26 @@ set -eu
 DSH_TELEMETRY_DISABLED=1
 export DSH_TELEMETRY_DISABLED
 
+# Limits for run_step. Each one catches a hang, not a slow run, so it stays far
+# above a normal run on a loaded machine: the registry reads take seconds and
+# the check suite takes about a minute.
+NETWORK_TIMEOUT_SECONDS=120
+INSTALL_TIMEOUT_SECONDS=300
+CHECK_TIMEOUT_SECONDS=600
+SAST_TIMEOUT_SECONDS=300
+
 # The shared pre-push SAST only reads the files a push changes, so code that
 # predates a rule is never seen again. This pass reads every tracked source
 # file, offline, and fails closed. The rules come from the running hook, not
 # from the pushed commit, so a commit cannot weaken the rules it is judged by.
 SAST_RULES="$(dirname -- "${HOOK_HELPERS:?run from .githooks (scripts/setup-hooks)}")/semgrep"
+
+# The list goes in here, not on the run_step line: a step runs with its stdin
+# from /dev/null, and an empty list would make semgrep scan nothing and pass.
+sast_scan() {
+	xargs -0 semgrep scan --config "$SAST_RULES" --error --metrics=off \
+		--disable-version-check --quiet <"$sast_list"
+}
 
 sast_full() {
 	if ! command -v semgrep >/dev/null 2>&1; then
@@ -33,17 +48,16 @@ sast_full() {
 		rm -f -- "$sast_list"
 		return 0
 	fi
-	xargs -0 semgrep scan --config "$SAST_RULES" --error --metrics=off \
-		--disable-version-check --quiet <"$sast_list"
-	sast_status=$?
+	sast_status=0
+	run_step semgrep "$SAST_TIMEOUT_SECONDS" sast_scan || sast_status=$?
 	rm -f -- "$sast_list"
 	return "$sast_status"
 }
 
 checks() {
-	npm audit signatures || return 1
-	pnpm run check || return 1
-	pnpm audit --audit-level high || return 1
+	run_step 'npm audit signatures' "$NETWORK_TIMEOUT_SECONDS" npm audit signatures || return 1
+	run_step 'pnpm run check' "$CHECK_TIMEOUT_SECONDS" pnpm run check || return 1
+	run_step 'pnpm audit' "$NETWORK_TIMEOUT_SECONDS" pnpm audit --audit-level high || return 1
 	sast_full || return 1
 }
 
@@ -58,9 +72,9 @@ top=$(git rev-parse --show-toplevel)
 install_deps() {
 	[ "$(pwd -P)" != "$(CDPATH='' cd -- "$top" && pwd -P)" ] || return 0
 	if [ -f pnpm-lock.yaml ]; then
-		pnpm install --frozen-lockfile >/dev/null || return 1
+		run_step 'pnpm install' "$INSTALL_TIMEOUT_SECONDS" pnpm install --frozen-lockfile >/dev/null || return 1
 	elif [ -f package-lock.json ]; then
-		npm ci --ignore-scripts --no-audit --no-fund >/dev/null || return 1
+		run_step 'npm ci' "$INSTALL_TIMEOUT_SECONDS" npm ci --ignore-scripts --no-audit --no-fund >/dev/null || return 1
 	fi
 }
 
