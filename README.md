@@ -1,7 +1,8 @@
 # dsh-terse
 
-Mandatory, always-on terseness for [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness)
-agents. Compresses everything an agent emits and everything it reads, without replacing the
+Mandatory, always-on terseness for [DeepSeek
+Harness](https://github.com/deepseek-ai/deepseek-harness) agents. Compresses
+everything an agent emits and everything it reads, without replacing the
 deployment's system prompt and without giving up answer quality.
 
 There is no mode and no off switch. Mounting the row is the enabling act.
@@ -9,7 +10,7 @@ There is no mode and no off switch. Mounting the row is the enabling act.
 ## What it does
 
 | Layer | Extension point | Effect |
-|---|---|---|
+| --- | --- | --- |
 | **L1 constitution** | `systemPrompt.section` | A static, cache-stable rule set that makes every reply compressed. |
 | **L2 standing reminder** | `systemPrompt.context` | A durable `<system-reminder>` snapshot that survives compaction, where a system-only rule fades. |
 | **L3 drift nudge** | `tools/post-execute` -> `additionalContexts` | A one-line reminder that rides a tool result and catches a reply that ran long. Capped per turn; cannot loop. |
@@ -19,25 +20,29 @@ There is no mode and no off switch. Mounting the row is the enabling act.
 
 ## Why it does not hurt quality
 
-Compression is aimed at the **chat mouth**, never at meaning or at durable artifacts:
+Compression is aimed at the **chat mouth**, never at meaning or at durable
+artifacts:
 
-- **Never cut** negations, quantifiers, numbers, units, code, identifiers, paths, commands, or
-  exact error strings. These are the token classes whose loss flips semantics.
-- **Never fake terseness.** Invented abbreviations and arrows cost the same tokens and hurt
-  clarity; if the terse form is not shorter than plain, plain wins.
-- **Full prose returns** for security warnings, irreversible-action confirmations,
-  order-sensitive multi-step sequences, and anywhere compression would create ambiguity.
+- **Never cut** negations, quantifiers, numbers, units, code, identifiers,
+  paths, commands, or exact error strings. These are the token classes whose
+  loss flips semantics.
+- **Never fake terseness.** Invented abbreviations and arrows cost the same
+  tokens and hurt clarity; if the terse form is not shorter than plain, plain
+  wins.
+- **Full prose returns** for security warnings, irreversible-action
+  confirmations, order-sensitive multi-step sequences, and anywhere compression
+  would create ambiguity.
 - **Code is never judged as drift**, so a long implementation is never punished.
-- **Tool output is only elided reversibly**, never lossy on errors, and the locator lets the
-  agent pull the original back.
+- **Tool output is only elided reversibly**, never lossy on errors, and the
+  locator lets the agent pull the original back.
 
-Those choices are measured in [benchmark/README.md](benchmark/README.md); their design record
-is a local working artifact, not a shipped doc.
+Those choices are measured in [benchmark/README.md](benchmark/README.md); their
+design record is a local working artifact, not a shipped doc.
 
 ## Install
 
-The plugin is one row, and it peers on the harness window `>=0.1.5-rc.1 <0.3.0`; the
-releases verified for it are listed in `dsh.compatibility.dshReleases` of
+The plugin is one row, and it peers on the harness window `>=0.1.5-rc.1 <0.3.0`;
+the releases verified for it are listed in `dsh.compatibility.dshReleases` of
 [`package.json`](package.json). Add it to a profile:
 
 ```bash
@@ -59,7 +64,7 @@ The shipped row is in [cordis.patch.yml](cordis.patch.yml).
 Every field is optional; the shipped defaults are the product.
 
 | Field | Default | Meaning |
-|---|---|---|
+| --- | --- | --- |
 | `constitution` | shipped text | Replaces the L1 rule set. |
 | `standing` | shipped text | Replaces the L2 reminder; empty suppresses it. |
 | `shaping` | `true` | Whether L4 runs. |
@@ -93,14 +98,16 @@ pnpm test
 pnpm run build
 ```
 
-A profile loads `dist/`, not `src/`; run `pnpm run build` before dogfooding a linked profile.
+A profile loads `dist/`, not `src/`; run `pnpm run build` before dogfooding a
+linked profile.
 
 ## Try it in the TUI
 
-`scripts/dogfood/run-terse-from-worktree.sh` clones the real `~/.dsh` to a scratch
-directory, mounts this checkout on the real `tui` profile inside the clone, and launches
-it. Every composition input is present — your other bundles, the profile patch, settings,
-themes, credentials — while every write goes to the throwaway clone.
+`scripts/dogfood/run-terse-from-worktree.sh` clones the real `~/.dsh` to a
+scratch directory, mounts this checkout on the real `tui` profile inside the
+clone, and launches it. Every composition input is present — your other bundles,
+the profile patch, settings, themes, credentials — while every write goes to the
+throwaway clone.
 
 ```bash
 ./scripts/dogfood/run-terse-from-worktree.sh              # clone, build, launch
@@ -110,16 +117,18 @@ themes, credentials — while every write goes to the throwaway clone.
 ./scripts/dogfood/run-terse-from-worktree.sh --clean      # remove the clone
 ```
 
-What to look for on the surface: the status line shows `injected … terse:standing …` when
-the layer is live. Ask a short factual question (expect one line), ask for code inline
-(expect the full implementation, no elision), and ask something safety-critical (expect
-full prose). Those three cases are the contract; if the code case is trimmed, that is a bug.
+What to look for on the surface: the status line shows `injected …
+terse:standing …` when the layer is live. Ask a short factual question (expect
+one line), ask for code inline (expect the full implementation, no elision), and
+ask something safety-critical (expect full prose). Those three cases are the
+contract; if the code case is trimmed, that is a bug.
 
 ## Benchmark
 
-`benchmark/benchmark.sh` measures this plugin against a control profile that lacks it. See
-[benchmark/README.md](benchmark/README.md); the neutral home is mandatory, because a
-profile whose global instructions already ask for brevity makes the control terse too.
+`benchmark/benchmark.sh` measures this plugin against a control profile that
+lacks it. See [benchmark/README.md](benchmark/README.md); the neutral home is
+mandatory, because a profile whose global instructions already ask for brevity
+makes the control terse too.
 
 ## License
 
@@ -127,9 +136,19 @@ MIT.
 
 ## Git hooks
 
-Checks run in tracked local Git hooks instead of push/PR CI. Run `scripts/setup-hooks` once after cloning; it points this clone's `core.hooksPath` at `.githooks`. Each hook runs the generic checks first (sign-off and commit message format, a gitleaks secret scan, and signed, signed-off commits on push), then this repository's checks in `.githooks/<hook>.d/` in name order. Install [gitleaks](https://github.com/gitleaks/gitleaks) first. Every check must pass before you push; never use `--no-verify`. Pre-push checks test exactly each pushed commit: in place only when it is the clean, unmodified checkout, otherwise in a temporary worktree of that commit.
+Checks run in tracked local Git hooks instead of push/PR CI. Run
+`scripts/setup-hooks` once after cloning; it points this clone's
+`core.hooksPath` at `.githooks`. Each hook runs the generic checks first
+(sign-off and commit message format, a gitleaks secret scan, and signed,
+signed-off commits on push), then this repository's checks in
+`.githooks/<hook>.d/` in name order. Install
+[gitleaks](https://github.com/gitleaks/gitleaks) first. Every check must pass
+before you push; never use `--no-verify`. Pre-push checks test exactly each
+pushed commit: in place only when it is the clean, unmodified checkout,
+otherwise in a temporary worktree of that commit.
 
 This repository's checks:
 
 - `pre-commit`: staged whitespace and conflict-marker check.
-- `pre-push`: `npm audit signatures`, `pnpm run check`, `pnpm audit --audit-level high`.
+- `pre-push`: `npm audit signatures`, `pnpm run check`, `pnpm audit
+  --audit-level high`.
