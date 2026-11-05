@@ -32,6 +32,8 @@ carry a breaking change, and a patch carries only fixes.
   gate.
 - `AGENTS.md` states the trunk-based delivery flow: changes land by a signed
   push to `main`, not through a pull request.
+- `RELEASE.md` states the trunk-based delivery flow: a harness matrix bump lands
+  on `main`, and the release tag goes on the candidate commit.
 
 ### Security
 

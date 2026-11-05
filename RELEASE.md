@@ -65,7 +65,7 @@ That is the matrix bump, and it is a release-sized change:
 4. Dogfood a real session against the new release before it ships: install the
    packed candidate into a cloned profile and drive the surface per
    [README](README.md#try-it-in-the-tui).
-5. Land the bump through a reviewed PR and ship it with the next patch release.
+5. Land the bump on `main` and ship it with the next patch release.
 
 Two facts about the 0.2.0 line belong beside the matrix:
 `@deepseek-ai/dsh-agent-presets` and
@@ -198,7 +198,7 @@ Draft the GitHub release notes against the candidate SHA before tagging. Tag
 creation for `v*` is restricted to repository admins by the ruleset above.
 
 ```sh
-git tag -s -a "v${PKG_VERSION}" -m "v${PKG_VERSION}" <merged-sha>
+git tag -s -a "v${PKG_VERSION}" -m "v${PKG_VERSION}" <candidate-sha>
 git push origin "v${PKG_VERSION}"
 ```
 
