@@ -41,9 +41,10 @@ design record is a local working artifact, not a shipped doc.
 
 ## Install
 
-The plugin is one row, and it peers on the harness window `>=0.1.5-rc.1 <0.3.0`;
-the releases verified for it are listed in `dsh.compatibility.dshReleases` of
-[`package.json`](package.json). Add it to a profile:
+The plugin is one row, and it peers on the harness window in
+`dsh.compatibility.dsh`; the releases verified for it are listed in
+`dsh.compatibility.dshReleases` of [`package.json`](package.json). Add it to a
+profile:
 
 ```bash
 dsh plugin --profile <name> add @sagmans/dsh-terse

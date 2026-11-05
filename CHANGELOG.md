@@ -18,6 +18,11 @@ carry a breaking change, and a patch carries only fixes.
 
 ### Changed
 
+- The harness matrix is verified against DeepSeek Harness `0.2.2-rc.1`, the
+  release now served as `latest`. The `0.2.2` prerelease line takes its own
+  range alternative, because npm resolves a prerelease only through a
+  comparator that names its `X.Y.Z` tuple. The development tree compiles
+  against that release, and its cordis and schemastery peers move with it.
 - Biome now refuses non-null assertions in the tests too. The harness matrix
   spec reports a malformed range alternative by its text.
 - The pre-push hook now stops a step that hangs. Network reads, installs, test

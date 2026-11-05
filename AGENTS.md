@@ -5,7 +5,7 @@ output maximally terse without costing quality. It is always-on and append-only:
 it contributes a prompt section, a durable context snapshot, and two
 `tools/post-execute` behaviours, and it never touches the deployment's own
 system prompt. ESM TypeScript (strict), Node ^24, pnpm 11.21.0, and the harness
-window `>=0.1.5-rc.1 <0.3.0` (`dsh.compatibility` in `package.json`), whose
+window in `dsh.compatibility.dsh` (`package.json`), whose
 verified releases live in `dsh.compatibility.dshReleases`: an API outside that
 line is not available here. Behaviour, install, and the benchmark that backs the
 claims: [README.md](README.md) and [benchmark/README.md](benchmark/README.md).
@@ -99,8 +99,8 @@ configured, so `release.yml` skips the publish job for `v0.1.0`; follow
 The peers and `dsh.compatibility.dsh` accept the whole compatible line, while
 the harness `devDependencies` and `dsh.compatibility.dshReleases` name the
 releases that passed the gates: npm resolves a prerelease only through a
-comparator naming its own `X.Y.Z` tuple, so `>=0.1.5-rc.1 <0.3.0` reaches
-`0.1.5-rc.3` and `0.2.0-rc.2` and never `0.1.7-rc.2`. The harness's own row
+comparator naming its own `X.Y.Z` tuple, so `>=0.2.2-0 <0.3.0-0` reaches
+`0.2.2-rc.1`, while the `0.2.1` alternative never does. The harness's own row
 preflight reads the peers instead, with prereleases participating, so the peers
 have to admit every listed release. `node tools/harness-matrix.mjs` guards the
 matrix and [RELEASE.md](RELEASE.md#harness-matrix) owns the bump; moving one
