@@ -14,6 +14,10 @@ on:
 permissions:
   contents: read
 
+# Runners have no user-level uv pin and must select a patched interpreter.
+env:
+  UV_PYTHON: "3.14.10"
+
 jobs:
   publish:
     # npm requires a package to exist before trusted publishing can be
@@ -50,6 +54,15 @@ jobs:
       - name: Tag must match package.json version
         run: test "v$(node -p 'require("./package.json").version')" = "$GITHUB_REF_NAME"
       # devDependencies supply tsc for the prepack build that npm publish runs.
+      # Publication lifecycles include the release checks and need managed Python.
+      - uses: jdx/mise-action@6be3c7ed4c21d4f76b208d351d95aac273ebb76d # v5.2.4
+        timeout-minutes: 5
+        with:
+          version: '2026.10.23'
+          cache: false
+          mise_toml: |
+            [tools]
+            uv = "0.13.6"
       - run: pnpm install --frozen-lockfile
       # The published artefact is built from this tree, so its registry
       # signatures are checked before npm publish packs it.
