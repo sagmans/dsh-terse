@@ -10,6 +10,9 @@ carry a breaking change, and a patch carries only fixes.
 
 ### Fixed
 
+- Release-helper checks require uv-managed Python, including when the shell
+  environment does not provide the usual Python path.
+
 - The harness peers accept DeepSeek Harness `0.2.1-rc.x`, so npm installs the
   plugin beside the current `latest` harness, `0.2.1-rc.5`. The range keeps one
   alternative per prerelease line, and the matrix guard reads that form.

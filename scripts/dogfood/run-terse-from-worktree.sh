@@ -17,6 +17,9 @@
 #   ./scripts/dogfood/run-terse-from-worktree.sh --clean
 set -euo pipefail
 
+# Scratch-profile edits must never fall back to a system interpreter.
+PYTHON=(uv run --no-project --python-preference only-managed python)
+
 name="$(basename "${BASH_SOURCE[0]}")"
 script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
 checkout="$(cd "$script_dir/../.." && pwd -P)"
@@ -82,7 +85,7 @@ if [ "$show_status" = 1 ]; then
   echo "profile:  $profile"
   echo "bundle:   $package -> $checkout"
   echo "bundles in profile:"
-  python3 - "$profile_dir/package.json" <<'PY'
+  "${PYTHON[@]}" - "$profile_dir/package.json" <<'PY'
 import json, sys
 d = json.load(open(sys.argv[1]))
 for b in d.get("dsh", {}).get("profile", {}).get("bundles", []):
@@ -125,7 +128,7 @@ done
 ln -sfn "$checkout" "$link_dir/dsh-terse"
 
 # Register the bundle in the profile manifest if it is not already there.
-python3 - "$profile_dir/package.json" "$package" <<'PY'
+"${PYTHON[@]}" - "$profile_dir/package.json" "$package" <<'PY'
 import json, sys
 path, pkg = sys.argv[1], sys.argv[2]
 d = json.load(open(path))

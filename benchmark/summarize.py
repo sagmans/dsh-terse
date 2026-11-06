@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env -S uv run --no-project --python-preference only-managed python
 """Summarize a dsh-terse benchmark run.
 
 Reads the <label>-<idx>.out/.secs files a run directory holds and reports output

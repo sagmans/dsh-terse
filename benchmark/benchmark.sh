@@ -11,6 +11,9 @@
 #                    [--terse PROFILE] [--control PROFILE]
 set -uo pipefail
 
+# A benchmark must not measure with an interpreter selected by the host PATH.
+PYTHON=(uv run --no-project --python-preference only-managed python)
+
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 HOME_DIR="/tmp/dsh-home-bench"
@@ -46,10 +49,10 @@ fi
 run_one() {
   local profile="$1" label="$2" task="$3" idx="$4"
   local base="$OUT_DIR/$label-$idx" start end code
-  start=$(python3 -c 'import time;print(time.time())')
+  start=$("${PYTHON[@]}" -c 'import time;print(time.time())') || return 1
   ( cd /tmp && dsh --profile "$profile" "$task" > "$base.out" 2> "$base.err" )
   code=$?
-  end=$(python3 -c 'import time;print(time.time())')
+  end=$("${PYTHON[@]}" -c 'import time;print(time.time())') || return 1
   awk -v a="$start" -v b="$end" 'BEGIN{printf "%.2f", b-a}' > "$base.secs"
   echo "$code" > "$base.code"
   printf '[%s#%s] exit=%s secs=%s bytes=%s\n' "$label" "$idx" "$code" "$(cat "$base.secs")" "$(wc -c < "$base.out" | tr -d ' ')"
@@ -58,8 +61,8 @@ run_one() {
 idx=0
 while IFS= read -r task; do
   [ -z "$task" ] && continue
-  run_one "$TERSE_PROFILE" terse "$task" "$idx"
-  run_one "$CONTROL_PROFILE" control "$task" "$idx"
+  run_one "$TERSE_PROFILE" terse "$task" "$idx" || exit 1
+  run_one "$CONTROL_PROFILE" control "$task" "$idx" || exit 1
   idx=$((idx+1))
 done < "$TASKS_FILE"
 
