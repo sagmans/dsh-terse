@@ -58,6 +58,9 @@ carry a breaking change, and a patch carries only fixes.
 
 ### Security
 
+- Retired the temporary release-age waiver for `0.2.2-rc.1` and its
+  dependencies after every exempt version cleared the seven-day window.
+
 - Security floors in `pnpm-workspace.yaml` now lift the transitive
   `@modelcontextprotocol/client` to `2.3.1` (GHSA-6prh-2h8m-c8cw: HTTP
   transports and OAuth requests followed cross-origin redirects and re-sent
@@ -82,12 +85,9 @@ carry a breaking change, and a patch carries only fixes.
   (TLS hostname check bypass). An exact pin means the release can no longer
   verify or publish on an unpatched cached runtime. Checks and tests pass on
   `24.22.1`. The published package is unchanged.
-- The release-age quarantine now exempts exact versions only. Every package of
-  the `0.2.2-rc.1` harness line, the framework row it peers on, and the
-  `@earendil-works` runtime are listed as `<package>@<version>`, so a later
-  release of any of them waits the full window again. The `fast-uri` `3.1.9`
-  row and the `libreoffice-kit*` pattern are gone, because both releases aged
-  out. The published package is unchanged.
+- The release-age quarantine accepts only exact-version exemptions. The
+  `fast-uri` `3.1.9` row and the `libreoffice-kit*` pattern are gone because
+  both releases aged out. The published package is unchanged.
 
 ## [0.2.1] - 2026-10-14
 
