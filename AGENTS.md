@@ -117,10 +117,11 @@ the window; the `tools/release-age-policy.mjs` guard fails on a bare name, a
 name pattern, a union, a duplicated row, a row the lockfile no longer resolves,
 a window of zero, and any block form it cannot read. A package whose install
 runs a build step stays blocked until it is listed in `allowBuilds`.
-`.github/dependabot.yml` repeats that window as a 7-day cooldown and ignores the
-transitive `@vitest/mocker` major and minor raises the runner cannot take. The
-`pre-push` hook adds `npm audit signatures`, `pnpm audit --audit-level high`,
-and a whole-tree semgrep scan on top of `pnpm run check`.
+Dependency updates are maintained by hand on `main`: raise each GitHub Actions
+pin to a full SHA, keep `@vitest/mocker` below the vitest release that pins it,
+and keep `@types/node` majors behind `engines.node`. The `pre-push` hook adds
+`npm audit signatures`, `pnpm audit --audit-level high`, and a whole-tree semgrep
+scan on top of `pnpm run check`.
 
 **The constitution is size-guarded on purpose.** It is input cost on every call;
 a spec fails if it grows past 360 estimated tokens (a crude estimate that

@@ -56,6 +56,11 @@ carry a breaking change, and a patch carries only fixes.
   fails, so the guard cannot pass a list it never read. `pnpm run check` runs
   it, so a wide or stale row fails before a push.
 
+- Dependency updates are maintained by hand on `main`; the automated update PR
+  configuration is retired. Security alerts stay enabled for manual triage, and
+  the release-age, `@vitest/mocker`, `@types/node`, and GitHub Actions pinning
+  rules still apply.
+
 ### Security
 
 - Retired the temporary release-age waiver for `0.2.2-rc.1` and its
