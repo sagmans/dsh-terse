@@ -8,6 +8,8 @@ carry a breaking change, and a patch carries only fixes.
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-11-20
+
 ### Fixed
 
 - Release-helper checks require uv-managed Python, including when the shell
@@ -217,6 +219,7 @@ carry a breaking change, and a patch carries only fixes.
   writer where two paths write behind the same `CONFIRM` gate, which is the kind
   of drift a reader takes for policy.
 
-[Unreleased]: https://github.com/sagmans/dsh-terse/compare/v0.2.1...HEAD
+[Unreleased]: https://github.com/sagmans/dsh-terse/compare/v0.3.0...HEAD
+[0.3.0]: https://github.com/sagmans/dsh-terse/compare/v0.2.1...v0.3.0
 [0.2.1]: https://github.com/sagmans/dsh-terse/compare/v0.2.0...v0.2.1
 [0.2.0]: https://github.com/sagmans/dsh-terse/compare/v0.1.0...v0.2.0
