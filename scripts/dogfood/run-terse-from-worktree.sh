@@ -26,7 +26,10 @@ checkout="$(cd "$script_dir/../.." && pwd -P)"
 package="@sagmans/dsh-terse"
 
 note() { printf '%s: %s\n' "$name" "$*" >&2; }
-die() { printf '%s: error: %s\n' "$name" "$*" >&2; exit 1; }
+die() {
+	printf '%s: error: %s\n' "$name" "$*" >&2
+	exit 1
+}
 
 source_home="$HOME/.dsh"
 profile="tui"
@@ -39,61 +42,92 @@ show_status=0
 extra_args=()
 
 while [ $# -gt 0 ]; do
-  case "$1" in
-    --source-home) source_home="$2"; shift 2 ;;
-    --profile) profile="$2"; shift 2 ;;
-    --scratch) scratch="$2"; shift 2 ;;
-    --dsh) dsh_bin="$2"; shift 2 ;;
-    --with-sessions) keep_sessions=1; shift ;;
-    --no-launch) no_launch=1; shift ;;
-    --status) show_status=1; shift ;;
-    --clean) clean=1; shift ;;
-    --help|-h) sed -n '2,20p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//'; exit 0 ;;
-    --) shift; extra_args=("$@"); break ;;
-    *) die "unknown option: $1" ;;
-  esac
+	case "$1" in
+	--source-home)
+		source_home="$2"
+		shift 2
+		;;
+	--profile)
+		profile="$2"
+		shift 2
+		;;
+	--scratch)
+		scratch="$2"
+		shift 2
+		;;
+	--dsh)
+		dsh_bin="$2"
+		shift 2
+		;;
+	--with-sessions)
+		keep_sessions=1
+		shift
+		;;
+	--no-launch)
+		no_launch=1
+		shift
+		;;
+	--status)
+		show_status=1
+		shift
+		;;
+	--clean)
+		clean=1
+		shift
+		;;
+	--help | -h)
+		sed -n '2,20p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//'
+		exit 0
+		;;
+	--)
+		shift
+		extra_args=("$@")
+		break
+		;;
+	*) die "unknown option: $1" ;;
+	esac
 done
 
 if [ "$clean" = 1 ]; then
-  # Only ever remove a directory this script created.
-  [ -f "$scratch/.dsh-terse-dogfood" ] || die "refusing to remove $scratch (not created by this script)"
-  rm -rf "$scratch"
-  note "removed $scratch"
-  exit 0
+	# Only ever remove a directory this script created.
+	[ -f "$scratch/.dsh-terse-dogfood" ] || die "refusing to remove $scratch (not created by this script)"
+	rm -rf "$scratch"
+	note "removed $scratch"
+	exit 0
 fi
 
 home="$scratch/home"
 profile_dir="$home/profiles/$profile"
 
 if [ ! -f "$scratch/.dsh-terse-dogfood" ]; then
-  note "cloning $source_home -> $home (sessions excluded)"
-  mkdir -p "$scratch"
-  if [ "$keep_sessions" = 1 ]; then
-    rsync -a --exclude '*.sock' "$source_home/" "$home/"
-  else
-    rsync -a --exclude 'sessions/' --exclude 'tui-stash/' --exclude '*.sock' "$source_home/" "$home/"
-    mkdir -p "$home/sessions"
-  fi
-  : > "$scratch/.dsh-terse-dogfood"
+	note "cloning $source_home -> $home (sessions excluded)"
+	mkdir -p "$scratch"
+	if [ "$keep_sessions" = 1 ]; then
+		rsync -a --exclude '*.sock' "$source_home/" "$home/"
+	else
+		rsync -a --exclude 'sessions/' --exclude 'tui-stash/' --exclude '*.sock' "$source_home/" "$home/"
+		mkdir -p "$home/sessions"
+	fi
+	: >"$scratch/.dsh-terse-dogfood"
 fi
 
 [ -d "$profile_dir" ] || die "profile \"$profile\" not found in $home"
 
 if [ "$show_status" = 1 ]; then
-  echo "scratch:  $scratch"
-  echo "home:     $home"
-  echo "profile:  $profile"
-  echo "bundle:   $package -> $checkout"
-  echo "bundles in profile:"
-  "${PYTHON[@]}" - "$profile_dir/package.json" <<'PY'
+	echo "scratch:  $scratch"
+	echo "home:     $home"
+	echo "profile:  $profile"
+	echo "bundle:   $package -> $checkout"
+	echo "bundles in profile:"
+	"${PYTHON[@]}" - "$profile_dir/package.json" <<'PY'
 import json, sys
 d = json.load(open(sys.argv[1]))
 for b in d.get("dsh", {}).get("profile", {}).get("bundles", []):
     print("  -", b)
 PY
-  echo "link:"
-  ls -l "$profile_dir/node_modules/@sagmans/dsh-terse" 2>/dev/null || echo "  (not linked; run without --status to link)"
-  exit 0
+	echo "link:"
+	ls -l "$profile_dir/node_modules/@sagmans/dsh-terse" 2>/dev/null || echo "  (not linked; run without --status to link)"
+	exit 0
 fi
 
 # Build so the profile loads current dist/, then link this checkout into the
@@ -112,17 +146,17 @@ link_dir="$profile_dir/node_modules/@sagmans"
 source_link_dir="$source_home/profiles/$profile/node_modules/@sagmans"
 mkdir -p "$link_dir"
 for link in "$link_dir"/*; do
-  [ -L "$link" ] || continue
-  target="$(readlink "$link")"
-  case "$target" in
-    /*) resolved="$target" ;;
-    *) resolved="$(cd "$source_link_dir" 2>/dev/null && cd "$(dirname "$target")" 2>/dev/null && pwd -P)/$(basename "$target")" ;;
-  esac
-  if [ -e "$resolved" ]; then
-    ln -sfn "$resolved" "$link"
-  else
-    note "warning: bundle $(basename "$link") -> $target does not resolve; leaving it"
-  fi
+	[ -L "$link" ] || continue
+	target="$(readlink "$link")"
+	case "$target" in
+	/*) resolved="$target" ;;
+	*) resolved="$(cd "$source_link_dir" 2>/dev/null && cd "$(dirname "$target")" 2>/dev/null && pwd -P)/$(basename "$target")" ;;
+	esac
+	if [ -e "$resolved" ]; then
+		ln -sfn "$resolved" "$link"
+	else
+		note "warning: bundle $(basename "$link") -> $target does not resolve; leaving it"
+	fi
 done
 
 ln -sfn "$checkout" "$link_dir/dsh-terse"
@@ -145,8 +179,8 @@ run_cmd="DSH_HOME=$home $dsh_bin --profile $profile"
 note "run: $run_cmd"
 
 if [ "$no_launch" = 1 ]; then
-  printf '\n  %s\n\n' "$run_cmd"
-  exit 0
+	printf '\n  %s\n\n' "$run_cmd"
+	exit 0
 fi
 
 exec env DSH_HOME="$home" "$dsh_bin" --profile "$profile" "${extra_args[@]:-}"

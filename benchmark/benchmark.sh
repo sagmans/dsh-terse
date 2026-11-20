@@ -23,48 +23,66 @@ TERSE_PROFILE="tersedog"
 CONTROL_PROFILE="dogplain"
 
 while [ $# -gt 0 ]; do
-  case "$1" in
-    --home) HOME_DIR="$2"; shift 2 ;;
-    --tasks) TASKS_FILE="$2"; shift 2 ;;
-    --out) OUT_DIR="$2"; shift 2 ;;
-    --terse) TERSE_PROFILE="$2"; shift 2 ;;
-    --control) CONTROL_PROFILE="$2"; shift 2 ;;
-    *) echo "unknown option: $1" >&2; exit 2 ;;
-  esac
+	case "$1" in
+	--home)
+		HOME_DIR="$2"
+		shift 2
+		;;
+	--tasks)
+		TASKS_FILE="$2"
+		shift 2
+		;;
+	--out)
+		OUT_DIR="$2"
+		shift 2
+		;;
+	--terse)
+		TERSE_PROFILE="$2"
+		shift 2
+		;;
+	--control)
+		CONTROL_PROFILE="$2"
+		shift 2
+		;;
+	*)
+		echo "unknown option: $1" >&2
+		exit 2
+		;;
+	esac
 done
 
 export DSH_HOME="$HOME_DIR"
 mkdir -p "$OUT_DIR"
 
 if [ ! -f "$TASKS_FILE" ]; then
-  echo "task file not found: $TASKS_FILE" >&2
-  exit 2
+	echo "task file not found: $TASKS_FILE" >&2
+	exit 2
 fi
 
 if [ -s "$HOME_DIR/AGENTS.md" ]; then
-  echo "warning: $HOME_DIR/AGENTS.md is not empty; the control arm will inherit" >&2
-  echo "         its brevity instructions and the comparison will understate savings" >&2
+	echo "warning: $HOME_DIR/AGENTS.md is not empty; the control arm will inherit" >&2
+	echo "         its brevity instructions and the comparison will understate savings" >&2
 fi
 
 run_one() {
-  local profile="$1" label="$2" task="$3" idx="$4"
-  local base="$OUT_DIR/$label-$idx" start end code
-  start=$("${PYTHON[@]}" -c 'import time;print(time.time())') || return 1
-  ( cd /tmp && dsh --profile "$profile" "$task" > "$base.out" 2> "$base.err" )
-  code=$?
-  end=$("${PYTHON[@]}" -c 'import time;print(time.time())') || return 1
-  awk -v a="$start" -v b="$end" 'BEGIN{printf "%.2f", b-a}' > "$base.secs"
-  echo "$code" > "$base.code"
-  printf '[%s#%s] exit=%s secs=%s bytes=%s\n' "$label" "$idx" "$code" "$(cat "$base.secs")" "$(wc -c < "$base.out" | tr -d ' ')"
+	local profile="$1" label="$2" task="$3" idx="$4"
+	local base="$OUT_DIR/$label-$idx" start end code
+	start=$("${PYTHON[@]}" -c 'import time;print(time.time())') || return 1
+	(cd /tmp && dsh --profile "$profile" "$task" >"$base.out" 2>"$base.err")
+	code=$?
+	end=$("${PYTHON[@]}" -c 'import time;print(time.time())') || return 1
+	awk -v a="$start" -v b="$end" 'BEGIN{printf "%.2f", b-a}' >"$base.secs"
+	echo "$code" >"$base.code"
+	printf '[%s#%s] exit=%s secs=%s bytes=%s\n' "$label" "$idx" "$code" "$(cat "$base.secs")" "$(wc -c <"$base.out" | tr -d ' ')"
 }
 
 idx=0
 while IFS= read -r task; do
-  [ -z "$task" ] && continue
-  run_one "$TERSE_PROFILE" terse "$task" "$idx" || exit 1
-  run_one "$CONTROL_PROFILE" control "$task" "$idx" || exit 1
-  idx=$((idx+1))
-done < "$TASKS_FILE"
+	[ -z "$task" ] && continue
+	run_one "$TERSE_PROFILE" terse "$task" "$idx" || exit 1
+	run_one "$CONTROL_PROFILE" control "$task" "$idx" || exit 1
+	idx=$((idx + 1))
+done <"$TASKS_FILE"
 
 echo "results: $OUT_DIR"
 echo "summarize with: $HERE/summarize.py $OUT_DIR"

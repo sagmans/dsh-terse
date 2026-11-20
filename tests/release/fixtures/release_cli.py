@@ -1,8 +1,10 @@
 """Synthetic CLI boundary; never contacts npm or GitHub."""
+
 import json
 import os
-from pathlib import Path
 import sys
+from pathlib import Path
+from typing import Any
 
 ARGS = sys.argv[1:]
 TOOL = Path(sys.argv[0]).name
@@ -14,8 +16,14 @@ GREEN = "\x1b[32m"
 RESET = "\x1b[0m"
 TRUST_FIELDS = ("type", "id", "file", "repository", "environment")
 TRUST_PERMISSION_LABELS = {"createPackage": "publish", "createStagedPackage": "stage publish"}
-TRUST = {"id": "test", "type": "github", "file": "release.yml", "repository": "example/tool",
-         "environment": "npm-release", "permissions": ["createPackage", "createStagedPackage"]}
+TRUST: dict[str, Any] = {
+    "id": "test",
+    "type": "github",
+    "file": "release.yml",
+    "repository": "example/tool",
+    "environment": "npm-release",
+    "permissions": ["createPackage", "createStagedPackage"],
+}
 CONFIG = {"registry": "https://registry.npmjs.org/", "@example:registry": "undefined"}
 with open(os.environ["CALL_LOG"], "a") as log:
     log.write(json.dumps([TOOL, *ARGS]) + "\n")
@@ -61,9 +69,9 @@ if TOOL == "npm":
         sys.exit(0)
     if ARGS[:2] == ["config", "get"]:
         key = ARGS[2]
-        if key == "registry" and SCENARIO == "rogue-registry":
-            print("https://other.example/")
-        elif key == "@example:registry" and SCENARIO == "rogue-scoped-registry":
+        if (key == "registry" and SCENARIO == "rogue-registry") or (
+            key == "@example:registry" and SCENARIO == "rogue-scoped-registry"
+        ):
             print("https://other.example/")
         else:
             print(CONFIG.get(key, "undefined"))
@@ -145,11 +153,14 @@ if TOOL == "gh":
         if endpoint == environment_endpoint:
             # Mirror GitHub: protections follow the payload, so a reviewer sent by the
             # helper would surface here and fail its own readback.
-            protections = [{"type": "branch_policy"}]
+            protections: list[dict[str, Any]] = [{"type": "branch_policy"}]
             if payload.get("reviewers"):
-                protections.append({"type": "required_reviewers", "reviewers": [
-                    {"type": "User", "reviewer": {"id": 42, "login": "example"}}
-                ]})
+                protections.append(
+                    {
+                        "type": "required_reviewers",
+                        "reviewers": [{"type": "User", "reviewer": {"id": 42, "login": "example"}}],
+                    }
+                )
             state["environment"] = {
                 "can_admins_bypass": payload["can_admins_bypass"],
                 "deployment_branch_policy": payload["deployment_branch_policy"],
@@ -171,9 +182,13 @@ if TOOL == "gh":
         output({"login": "example", "id": 42})
     if endpoint == environment_endpoint:
         if SCENARIO == "branch-policy":
-            output({"can_admins_bypass": False,
+            output(
+                {
+                    "can_admins_bypass": False,
                     "deployment_branch_policy": {"protected_branches": False, "custom_branch_policies": True},
-                    "protection_rules": [{"type": "branch_policy"}]})
+                    "protection_rules": [{"type": "branch_policy"}],
+                }
+            )
         if "environment" in state:
             output(state["environment"])
         print("gh: Not Found (HTTP 404)", file=sys.stderr)

@@ -21,6 +21,12 @@ carry a breaking change, and a patch carries only fixes.
 
 ### Changed
 
+- Pin repository tooling in `mise.toml`, `packageManager`, and
+  `pyproject.toml`/`uv.lock`, enforce fail-closed Python (`ruff` format/lint,
+  `mypy`) and shell (`shellcheck`, `shfmt`) checks across `pre-commit` and
+  `pnpm run check`, verify tool floors before `pre-push` dependency install,
+  and force online `pnpm audit` at `pre-push`. The published package is
+  unchanged.
 - The harness matrix is verified against DeepSeek Harness `0.2.2-rc.5`, the
   release now served as `latest`; `0.2.2-rc.1` stays verified. The `0.2.2`
   prerelease line takes its own range alternative, because npm resolves a

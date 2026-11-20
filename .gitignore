@@ -152,3 +152,8 @@ docs/
 # Python bytecode from the release-helper test suite; regenerated on every run.
 __pycache__/
 *.pyc
+
+# Local Python lint/typecheck tool environment and caches (regenerated from uv.lock)
+.venv/
+.mypy_cache/
+.ruff_cache/

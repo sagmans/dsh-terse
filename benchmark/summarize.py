@@ -6,6 +6,7 @@ size and wall time per arm. Tokens are estimated as non-whitespace characters
 divided by four; the constant is crude but identical across arms, so the DELTA
 between arms is meaningful even when the absolute number is not.
 """
+
 from __future__ import annotations
 
 import argparse

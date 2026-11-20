@@ -28,7 +28,11 @@ git commit -s -S -m "<conventional-commit message>"
 
 | Task | Command |
 | --- | --- |
+| Tool version floors (`mise.toml`, `packageManager`) | `pnpm run check:tools` |
 | Lint and format check (Biome) | `pnpm run lint` (`pnpm run lint:fix` repairs) |
+| Python format and lint (pinned `ruff` via `uv.lock`) | `pnpm run lint:py` |
+| Python typecheck (pinned `mypy` via `uv.lock`) | `pnpm run typecheck:py` |
+| Shell lint and format (`shellcheck`, `shfmt`) | `pnpm run lint:sh` |
 | Typecheck `src` and `tests` | `pnpm run typecheck` |
 | Unit tests | `pnpm test` |
 | One unit test | `pnpm vitest run tests/unit/drift.spec.ts -t "<name>"` |
@@ -182,11 +186,14 @@ broken packages as `RELEASE.md` directs. Helper mutations require
 Checks run in `.githooks/`, not in hosted CI. Run `scripts/setup-hooks` after
 cloning. All checks must pass before you push. Never use `--no-verify`.
 `pre-commit`: Biome on the staged files (`pnpm run lint:fix` repairs most
-findings). `pre-push`: `npm audit signatures`, `pnpm run check`,
-`pnpm audit --audit-level high`, and a semgrep scan of every tracked source
-file. No hosted workflow runs checks.
+findings), pinned `ruff` format/lint on staged Python files (`uv.lock`), and
+`shellcheck`/`shfmt` on staged shell scripts. `pre-push`: `npm audit signatures`,
+`pnpm run check`, `pnpm audit --audit-level high`, and a semgrep scan of every
+tracked source file. Tool floors live in `mise.toml`, `package.json`,
+`pnpm-lock.yaml`, and `uv.lock`. No hosted workflow runs checks.
 
 Commit messages follow `.githooks/GIT_CONVENTION.md`, which `commit-msg` and
 `pre-push` enforce. The generic checks need gitleaks, osv-scanner, semgrep,
 lizard and markdownlint-cli2, plus actionlint and zizmor when a push changes
-workflow files. A missing tool blocks the hook.
+workflow files; stack checks also require `uv`, `shellcheck`, and `shfmt`
+(pinned in `mise.toml`). A missing tool blocks the hook.
