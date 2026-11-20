@@ -42,7 +42,7 @@ devDependencies name one verified release — and `pnpm run check` runs it with
 the rest of the gates.
 
 A range admits a prerelease only through a comparator naming its own `X.Y.Z`
-tuple, so `>=0.2.2-0 <0.3.0-0` resolves `0.2.2-rc.1`, while the `0.2.1`
+tuple, so `>=0.2.2-0 <0.3.0-0` resolves `0.2.2-rc.5`, while the `0.2.1`
 alternative never does: the peers carry the whole range, because that is the line
 a profile installs against, while the packages in the dev tree name one verified
 release, the way the harness's own bundles pin.

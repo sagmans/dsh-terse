@@ -21,11 +21,12 @@ carry a breaking change, and a patch carries only fixes.
 
 ### Changed
 
-- The harness matrix is verified against DeepSeek Harness `0.2.2-rc.1`, the
-  release now served as `latest`. The `0.2.2` prerelease line takes its own
-  range alternative, because npm resolves a prerelease only through a
-  comparator that names its `X.Y.Z` tuple. The development tree compiles
-  against that release, and its cordis and schemastery peers move with it.
+- The harness matrix is verified against DeepSeek Harness `0.2.2-rc.5`, the
+  release now served as `latest`; `0.2.2-rc.1` stays verified. The `0.2.2`
+  prerelease line takes its own range alternative, because npm resolves a
+  prerelease only through a comparator that names its `X.Y.Z` tuple. The
+  development tree compiles against that release, and its cordis and
+  schemastery peers move with it.
 - Biome now refuses non-null assertions in the tests too. The harness matrix
   spec reports a malformed range alternative by its text.
 - The pre-push hook now stops a step that hangs. Network reads, installs, test
@@ -63,6 +64,10 @@ carry a breaking change, and a patch carries only fixes.
 
 ### Security
 
+- A temporary release-age waiver in `pnpm-workspace.yaml` names the exact
+  `0.2.2-rc.5` harness release and its young dependencies, with the owner's
+  approval. Remove it on or after 2026-11-25 13:21 UTC, when the youngest entry
+  leaves the seven-day window.
 - Retired the temporary release-age waiver for `0.2.2-rc.1` and its
   dependencies after every exempt version cleared the seven-day window.
 

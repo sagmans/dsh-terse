@@ -104,7 +104,7 @@ The peers and `dsh.compatibility.dsh` accept the whole compatible line, while
 the harness `devDependencies` and `dsh.compatibility.dshReleases` name the
 releases that passed the gates: npm resolves a prerelease only through a
 comparator naming its own `X.Y.Z` tuple, so `>=0.2.2-0 <0.3.0-0` reaches
-`0.2.2-rc.1`, while the `0.2.1` alternative never does. The harness's own row
+`0.2.2-rc.5`, while the `0.2.1` alternative never does. The harness's own row
 preflight reads the peers instead, with prereleases participating, so the peers
 have to admit every listed release. `node tools/harness-matrix.mjs` guards the
 matrix and [RELEASE.md](RELEASE.md#harness-matrix) owns the bump; moving one
